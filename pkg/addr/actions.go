@@ -11,6 +11,10 @@ import (
 	p "github.com/zostay/go-addr/pkg/rfc5322"
 )
 
+var (
+	ErrPartialParse = errors.New("incomplete parsing of email address")
+)
+
 func ApplyActions(m *rd.Match, mk interface{}) error {
 	applySubmatchActions(m)
 	applyGroupActions(m)

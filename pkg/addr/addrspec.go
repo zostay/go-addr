@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zostay/go-addr/pkg/format"
+	"github.com/zostay/go-addr/pkg/rfc5322"
 )
 
 type AddrSpec struct {
@@ -37,4 +38,20 @@ func NewAddrSpecParsed(lp, d, o string) *AddrSpec {
 		domain:    d,
 		original:  o,
 	}
+}
+
+func ParseEmailAddrSpec(a string) (*AddrSpec, error) {
+	m, cs := rfc5322.MatchAddrSpec([]byte(a))
+
+	var address AddrSpec
+	err := ApplyActions(m, &address)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(cs) > 0 {
+		return &address, ErrPartialParse
+	}
+
+	return &address, nil
 }

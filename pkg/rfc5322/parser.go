@@ -353,8 +353,8 @@ func MatchAText(cs []byte) (*rd.Match, []byte) {
 				c == byte('$') || c == byte('%') ||
 				c == byte('&') || c == byte('\'') ||
 				c == byte('*') || c == byte('+') ||
-				c == byte('-') || c == byte('+') ||
-				c == byte('=') || c == byte('/') ||
+				c == byte('-') || c == byte('/') ||
+				c == byte('=') || c == byte('?') ||
 				c == byte('^') || c == byte('_') ||
 				c == byte('`') || c == byte('{') ||
 				c == byte('|') || c == byte('}') ||
