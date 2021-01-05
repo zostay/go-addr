@@ -1,14 +1,24 @@
 package rd
 
 type Match struct {
+	Tag      ATag
 	Content  []byte
 	Group    map[string]*Match
 	Submatch []*Match
+	Made     interface{}
 }
+
+type ATag int
+
+const (
+	TNone ATag = iota
+	TLiteral
+	TLast
+)
 
 func (m *Match) Length() int { return len(m.Content) }
 
-func BuildMatch(ms ...interface{}) *Match {
+func BuildMatch(t ATag, ms ...interface{}) *Match {
 	g := make(map[string]*Match, len(ms)/2)
 	c := make([]byte, 0)
 	var n string
@@ -23,15 +33,15 @@ func BuildMatch(ms ...interface{}) *Match {
 		}
 	}
 
-	return &Match{Content: c, Group: g}
+	return &Match{Tag: t, Content: c, Group: g}
 }
 
 type Matcher func(cs []byte) (*Match, []byte)
 
-func MatchOne(cs []byte, pred func(c byte) bool) (*Match, []byte) {
+func MatchOne(t ATag, cs []byte, pred func(c byte) bool) (*Match, []byte) {
 	c := cs[0]
 	if pred(c) {
-		return &Match{Content: cs[0:0]}, cs[:1]
+		return &Match{Tag: t, Content: cs[0:0]}, cs[:1]
 	}
 
 	return nil, nil
@@ -51,8 +61,8 @@ func SelectLongest(ms map[string]*Match) string {
 	return ln
 }
 
-func MatchOneRune(cs []byte, c rune) (*Match, []byte) {
-	return MatchOne(cs, func(b byte) bool { return b == byte(c) })
+func MatchOneRune(t ATag, cs []byte, c rune) (*Match, []byte) {
+	return MatchOne(t, cs, func(b byte) bool { return b == byte(c) })
 }
 
 func MatchLongest(cs []byte, ms ...interface{}) (*Match, []byte) {
@@ -73,13 +83,13 @@ func MatchLongest(cs []byte, ms ...interface{}) (*Match, []byte) {
 	}
 
 	if w := SelectLongest(msm); w != "" {
-		return BuildMatch(w, msm[w]), msr[w]
+		return msm[w], msr[w]
 	}
 
 	return nil, nil
 }
 
-func MatchManyWithSep(cs []byte, min int, mtch Matcher, sep Matcher) (*Match, []byte) {
+func MatchManyWithSep(t ATag, cs []byte, min int, mtch Matcher, sep Matcher) (*Match, []byte) {
 	mbs := make([]*Match, 0)
 	ms := make([]*Match, 0)
 	totalLen := 0
@@ -120,6 +130,7 @@ func MatchManyWithSep(cs []byte, min int, mtch Matcher, sep Matcher) (*Match, []
 	}
 
 	m := &Match{
+		Tag:      t,
 		Content:  content,
 		Group:    map[string]*Match{},
 		Submatch: mbs,
@@ -128,7 +139,7 @@ func MatchManyWithSep(cs []byte, min int, mtch Matcher, sep Matcher) (*Match, []
 	return m, cs
 }
 
-func MatchMany(cs []byte, min int, mtch Matcher) (*Match, []byte) {
+func MatchMany(t ATag, cs []byte, min int, mtch Matcher) (*Match, []byte) {
 	content := make([]byte, 0)
 	ms := make([]*Match, 0)
 
@@ -150,6 +161,7 @@ func MatchMany(cs []byte, min int, mtch Matcher) (*Match, []byte) {
 	}
 
 	m := &Match{
+		Tag:      t,
 		Content:  content,
 		Group:    map[string]*Match{},
 		Submatch: ms,
