@@ -51,7 +51,7 @@ func MatchCRLF(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	return rd.BuildMatch(rd.TLiteral, "cr", cr, "lf", lf), cs
+	return rd.BuildMatch(rd.TLiteral, "", cr, "", lf), cs
 }
 
 // DQUOTE         =  %x22
