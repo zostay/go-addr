@@ -16,6 +16,10 @@ var (
 )
 
 func ApplyActions(m *rd.Match, mk interface{}) error {
+	if m == nil {
+		return errors.New("email parse failed")
+	}
+
 	applySubmatchActions(m)
 	applyGroupActions(m)
 
@@ -72,9 +76,16 @@ func applyThisAction(m *rd.Match) (err error) {
 	case rd.TLiteral:
 		m.Made = string(m.Content)
 	case p.TNameAddr:
+		var dn string
+		if m.Group["display-name"] != nil {
+			dn = m.Group["display-name"].Made.(string)
+		} else {
+			dn = ""
+		}
+
 		c := accumulateComments(m)
 		m.Made, err = NewMailboxParsed(
-			m.Group["display-name"].Made.(string),
+			dn,
 			m.Group["angle-addr"].Made.(*AddrSpec),
 			c,
 			string(m.Content),
@@ -85,9 +96,16 @@ func applyThisAction(m *rd.Match) (err error) {
 	case p.TAngleAddr:
 		m.Made = m.Group["addr-spec"].Made
 	case p.TGroup:
+		var mbl MailboxList
+		if m.Group["group-list"] != nil {
+			mbl = m.Group["group-list"].Made.(MailboxList)
+		} else {
+			mbl = MailboxList{}
+		}
+
 		m.Made = NewGroupParsed(
 			m.Group["display-name"].Made.(string),
-			m.Group["group-list"].Made.(MailboxList),
+			mbl,
 			string(m.Content),
 		)
 	case p.TDisplayName:
@@ -125,18 +143,26 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = a.String()
 	case p.TAtom:
 		var a strings.Builder
-		a.WriteString(m.Group["pre"].Made.(string))
+		if m.Group["pre"] != nil {
+			a.WriteString(m.Group["pre"].Made.(string))
+		}
 		a.Write(m.Group["atext"].Content)
-		a.WriteString(m.Group["post"].Made.(string))
+		if m.Group["post"] != nil {
+			a.WriteString(m.Group["post"].Made.(string))
+		}
 		m.Made = a.String()
 	case p.TDotAtom:
 		var a strings.Builder
-		a.WriteString(m.Group["pre"].Made.(string))
+		if m.Group["pre"] != nil {
+			a.WriteString(m.Group["pre"].Made.(string))
+		}
 		a.WriteString(m.Group["dot-atom-text"].Made.(string))
-		a.WriteString(m.Group["post"].Made.(string))
+		if m.Group["pre"] != nil {
+			a.WriteString(m.Group["post"].Made.(string))
+		}
 		m.Made = a.String()
 	case p.TQuotedString:
-		m.Made = string(unquotePairs(m.Group["qcontent"].Content))
+		m.Made = string(unquotePairs([]byte(m.Group["qcontent"].Made.(string))))
 	case p.TComment:
 		m.Made = string(unquotePairs(m.Group["comment-content"].Content))
 	}
@@ -151,7 +177,7 @@ func unfoldFWS(x []byte) []byte {
 }
 
 var (
-	quotable map[byte]struct{}
+	quotable = map[byte]struct{}{}
 )
 
 func init() {

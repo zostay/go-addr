@@ -41,8 +41,8 @@ const (
 
 func MatchAddress(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"mailbox", MatchMailbox,
-		"group", MatchGroup,
+		"mailbox", rd.Matcher(MatchMailbox),
+		"group", rd.Matcher(MatchGroup),
 	)
 }
 
@@ -50,8 +50,8 @@ func MatchAddress(cs []byte) (*rd.Match, []byte) {
 
 func MatchMailbox(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"name-addr", MatchNameAddr,
-		"addr-spec", MatchAddrSpec,
+		"name-addr", rd.Matcher(MatchNameAddr),
+		"addr-spec", rd.Matcher(MatchAddrSpec),
 	)
 }
 
@@ -78,7 +78,10 @@ func MatchNameAddr(cs []byte) (*rd.Match, []byte) {
 //                     obs-angle-addr
 
 func MatchAngleAddr(cs []byte) (*rd.Match, []byte) {
-	return rd.MatchLongest(cs, "cur", MatchCurAngleAddr, "obs", MatchObsAngleAddr)
+	return rd.MatchLongest(cs,
+		"cur", rd.Matcher(MatchCurAngleAddr),
+		"obs", rd.Matcher(MatchObsAngleAddr),
+	)
 }
 
 func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
@@ -91,7 +94,7 @@ func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 	}
 
 	la, cs = rd.MatchOneRune(rd.TNone, cs, '<')
-	if ra == nil {
+	if la == nil {
 		return nil, nil
 	}
 
@@ -101,7 +104,7 @@ func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 	}
 
 	ra, cs = rd.MatchOneRune(rd.TNone, cs, '>')
-	if la == nil {
+	if ra == nil {
 		return nil, nil
 	}
 
@@ -155,8 +158,8 @@ func MatchDisplayName(cs []byte) (*rd.Match, []byte) {
 
 func MatchMailboxList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"mailbox", MatchCurMboxList,
-		"obs-mbox-list", MatchObsMboxList,
+		"mailbox", rd.Matcher(MatchCurMboxList),
+		"obs-mbox-list", rd.Matcher(MatchObsMboxList),
 	)
 }
 
@@ -171,8 +174,8 @@ func MatchCurMboxList(cs []byte) (*rd.Match, []byte) {
 
 func MatchAddressList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"address", MatchCurAddrList,
-		"obs-addr-list", MatchObsAddrList,
+		"address", rd.Matcher(MatchCurAddrList),
+		"obs-addr-list", rd.Matcher(MatchObsAddrList),
 	)
 }
 
@@ -187,9 +190,9 @@ func MatchCurAddrList(cs []byte) (*rd.Match, []byte) {
 
 func MatchGroupList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"mailbox-list", MatchMailboxList,
-		"cfws", MatchCFWS,
-		"obs-group-list", MatchObsGroupList,
+		"mailbox-list", rd.Matcher(MatchMailboxList),
+		"cfws", rd.Matcher(MatchCFWS),
+		"obs-group-list", rd.Matcher(MatchObsGroupList),
 	)
 }
 
@@ -211,7 +214,7 @@ func MatchAddrSpec(cs []byte) (*rd.Match, []byte) {
 	}
 
 	d, cs = MatchDomain(cs)
-	if d != nil {
+	if d == nil {
 		return nil, nil
 	}
 
@@ -222,9 +225,9 @@ func MatchAddrSpec(cs []byte) (*rd.Match, []byte) {
 
 func MatchLocalPart(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"dot-atom", MatchDotAtom,
-		"quoted-string", MatchQuotedString,
-		"obs-local-part", MatchObsLocalPart,
+		"dot-atom", rd.Matcher(MatchDotAtom),
+		"quoted-string", rd.Matcher(MatchQuotedString),
+		"obs-local-part", rd.Matcher(MatchObsLocalPart),
 	)
 }
 
@@ -232,9 +235,9 @@ func MatchLocalPart(cs []byte) (*rd.Match, []byte) {
 
 func MatchDomain(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"dot-atom", MatchDotAtom,
-		"domain-literal", MatchDomainLiteral,
-		"obs-domain", MatchObsDomain,
+		"dot-atom", rd.Matcher(MatchDotAtom),
+		"domain-literal", rd.Matcher(MatchDomainLiteral),
+		"obs-domain", rd.Matcher(MatchObsDomain),
 	)
 }
 
@@ -264,7 +267,7 @@ func MatchDomainLiteral(cs []byte) (*rd.Match, []byte) {
 	}
 
 	return rd.BuildMatch(
-		TDomainLiteral,
+		rd.TLiteral,
 		"pre-literal", pl,
 		"", lb,
 		"literal", lit,
@@ -300,15 +303,15 @@ func MatchDomainLiteralLiteralLiteral(cs []byte) (*rd.Match, []byte) {
 func MatchDText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		"printable-ascii",
-		func(cs []byte) (*rd.Match, []byte) {
+		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
 			return rd.MatchOne(rd.TNone, cs, func(c byte) bool { return c >= 0x21 && c <= 0x5a })
-		},
+		}),
 		"other-characters",
-		func(cs []byte) (*rd.Match, []byte) {
+		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
 			return rd.MatchOne(rd.TNone, cs, func(c byte) bool { return c >= 0x5e && c <= 0x7e })
-		},
+		}),
 		"obs-dtext",
-		MatchObsDText,
+		rd.Matcher(MatchObsDText),
 	)
 }
 
@@ -316,8 +319,8 @@ func MatchDText(cs []byte) (*rd.Match, []byte) {
 
 func MatchWord(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"atom", MatchAtom,
-		"quoted-string", MatchQuotedString,
+		"atom", rd.Matcher(MatchAtom),
+		"quoted-string", rd.Matcher(MatchQuotedString),
 	)
 }
 
@@ -325,8 +328,8 @@ func MatchWord(cs []byte) (*rd.Match, []byte) {
 
 func MatchPhrase(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"words", func(cs []byte) (*rd.Match, []byte) { return rd.MatchMany(TWords, cs, 1, MatchWord) },
-		"obs-phrase", MatchObsPhrase,
+		"words", rd.Matcher(func(cs []byte) (*rd.Match, []byte) { return rd.MatchMany(TWords, cs, 1, MatchWord) }),
+		"obs-phrase", rd.Matcher(MatchObsPhrase),
 	)
 }
 
@@ -415,7 +418,7 @@ func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 		cs = rcs
 	}
 
-	return rd.BuildMatch(TDotAtom, "pre", pre, "dot-atom-text", at, "post", post), cs
+	return rd.BuildMatch(rd.TLiteral, "pre", pre, "dot-atom-text", at, "post", post), cs
 }
 
 // FWS             =   ([*WSP CRLF] 1*WSP) /  obs-FWS
@@ -423,8 +426,8 @@ func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 
 func MatchFWS(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"cur-fws", MatchCurFWS,
-		"obs-fws", MatchObsFWS,
+		"cur-fws", rd.Matcher(MatchCurFWS),
+		"obs-fws", rd.Matcher(MatchObsFWS),
 	)
 }
 
@@ -469,8 +472,8 @@ func MatchCurFWSPre(cs []byte) (*rd.Match, []byte) {
 
 func MatchCText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"cur-ctext", MatchCurCText,
-		"obs-ctext", MatchObsCText,
+		"cur-ctext", rd.Matcher(MatchCurCText),
+		"obs-ctext", rd.Matcher(MatchObsCText),
 	)
 }
 
@@ -486,9 +489,9 @@ func MatchCurCText(cs []byte) (*rd.Match, []byte) {
 
 func MatchCContent(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"ctext", MatchCText,
-		"quoted-pair", MatchQuotedPair,
-		"comment", MatchComment,
+		"ctext", rd.Matcher(MatchCText),
+		"quoted-pair", rd.Matcher(MatchQuotedPair),
+		"comment", rd.Matcher(MatchComment),
 	)
 }
 
@@ -538,8 +541,8 @@ func MatchComment(cs []byte) (*rd.Match, []byte) {
 
 func MatchCFWS(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"cfws-with-comment", MatchCFWSWithComment,
-		"fws", MatchFWS,
+		"cfws-with-comment", rd.Matcher(MatchCFWSWithComment),
+		"fws", rd.Matcher(MatchFWS),
 	)
 }
 
@@ -564,6 +567,9 @@ func MatchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TNone, "pre", pre, "comment", comment), cs
 	})
+	if pres == nil {
+		return nil, nil
+	}
 
 	if post, rcs := MatchFWS(cs); post != nil {
 		cs = rcs
@@ -601,6 +607,9 @@ func MatchObsFWS(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "crlf", crlf, "wsp", wsps), cs
 	})
+	if crlfs == nil {
+		return nil, nil
+	}
 
 	return rd.BuildMatch(TObsFWS, "wsp", wsp, "crlfs", crlfs), cs
 }
@@ -613,15 +622,15 @@ func MatchObsFWS(cs []byte) (*rd.Match, []byte) {
 func MatchQText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		"printable-ascii",
-		func(cs []byte) (*rd.Match, []byte) {
+		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
 			return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool {
 				return c == 0x21 ||
 					(c >= 0x23 && c <= 0x5b) ||
 					(c >= 0x5d && c <= 0x7e)
 			})
-		},
+		}),
 		"obs-qtext",
-		MatchObsQText,
+		rd.Matcher(MatchObsQText),
 	)
 }
 
@@ -629,8 +638,8 @@ func MatchQText(cs []byte) (*rd.Match, []byte) {
 
 func MatchQContent(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"qtext", MatchQText,
-		"quoted-pair", MatchQuotedPair,
+		"qtext", rd.Matcher(MatchQText),
+		"quoted-pair", rd.Matcher(MatchQuotedPair),
 	)
 }
 
@@ -668,6 +677,9 @@ func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", fws, "qcontent", qc), cs
 	})
+	if qc == nil {
+		return nil, nil
+	}
 
 	if fws, rcs := MatchFWS(cs); fws != nil {
 		cs = rcs
@@ -728,17 +740,17 @@ func MatchObsQP(cs []byte) (*rd.Match, []byte) {
 
 	ch, cs = rd.MatchLongest(cs,
 		"escaped",
-		func(cs []byte) (*rd.Match, []byte) {
+		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
 			return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool {
 				return c == 0
 			})
-		},
+		}),
 		"obs-no-ws-ctl",
-		MatchObsNoWSCtl,
+		rd.Matcher(MatchObsNoWSCtl),
 		"lf",
-		rfc5234.MatchLF,
+		rd.Matcher(rfc5234.MatchLF),
 		"cr",
-		rfc5234.MatchCR,
+		rd.Matcher(rfc5234.MatchCR),
 	)
 	if ch == nil {
 		return nil, nil
@@ -762,13 +774,16 @@ func MatchObsPhrase(cs []byte) (*rd.Match, []byte) {
 	tail, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		return rd.MatchLongest(cs,
 			"word",
-			MatchWord,
+			rd.Matcher(MatchWord),
 			"period",
-			func(cs []byte) (*rd.Match, []byte) { return rd.MatchOneRune(rd.TLiteral, cs, '.') },
+			rd.Matcher(func(cs []byte) (*rd.Match, []byte) { return rd.MatchOneRune(rd.TLiteral, cs, '.') }),
 			"cfws",
-			MatchCFWS,
+			rd.Matcher(MatchCFWS),
 		)
 	})
+	if tail == nil {
+		return nil, nil
+	}
 
 	return rd.BuildMatch(TObsPhrase, "head", head, "tail", tail), cs
 }
@@ -778,7 +793,7 @@ func MatchObsPhrase(cs []byte) (*rd.Match, []byte) {
 func MatchQuotedPair(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		"escape",
-		func(cs []byte) (*rd.Match, []byte) {
+		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
 			var (
 				bs, ch *rd.Match
 			)
@@ -799,9 +814,9 @@ func MatchQuotedPair(cs []byte) (*rd.Match, []byte) {
 			}
 
 			return rd.BuildMatch(rd.TLiteral, "", bs, "", ch), cs
-		},
+		}),
 		"obs-qp",
-		MatchObsQP,
+		rd.Matcher(MatchObsQP),
 	)
 }
 
@@ -874,11 +889,14 @@ func MatchObsDomainList(cs []byte) (*rd.Match, []byte) {
 	bf, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		return rd.MatchLongest(cs,
 			"cfws",
-			MatchCFWS,
+			rd.Matcher(MatchCFWS),
 			"comma",
-			func(cs []byte) (*rd.Match, []byte) { return rd.MatchOneRune(rd.TLiteral, cs, ',') },
+			rd.Matcher(func(cs []byte) (*rd.Match, []byte) { return rd.MatchOneRune(rd.TLiteral, cs, ',') }),
 		)
 	})
+	if bf == nil {
+		return nil, nil
+	}
 
 	at, cs = rd.MatchOneRune(rd.TLiteral, cs, '@')
 	if at == nil {
@@ -916,6 +934,9 @@ func MatchObsDomainList(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", c, "", cfws, "", at, "", d), cs
 	})
+	if tail == nil {
+		return nil, nil
+	}
 
 	return rd.BuildMatch(TObsDomainList, "", bf, "", at, "head", head, "tail", tail), cs
 }
@@ -943,6 +964,9 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", cfws, "", c), cs
 	})
+	if bf == nil {
+		return nil, nil
+	}
 
 	head, cs = MatchMailbox(cs)
 	if head == nil {
@@ -961,9 +985,9 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 
 		mb, rcs := rd.MatchLongest(cs,
 			"mailbox",
-			MatchMailbox,
+			rd.Matcher(MatchMailbox),
 			"cfws",
-			MatchCFWS,
+			rd.Matcher(MatchCFWS),
 		)
 		if mb != nil {
 			cs = rcs
@@ -971,6 +995,9 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", c, "", mb), cs
 	})
+	if tail == nil {
+		return nil, nil
+	}
 
 	return rd.BuildMatch(TObsMboxList, "", bf, "head", head, "tail", tail), cs
 }
@@ -998,6 +1025,9 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", cfws, "", c), cs
 	})
+	if bf == nil {
+		return nil, nil
+	}
 
 	head, cs = MatchAddress(cs)
 	if head == nil {
@@ -1015,8 +1045,8 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 		}
 
 		address, rcs := rd.MatchLongest(cs,
-			"address", MatchAddress,
-			"cfws", MatchCFWS,
+			"address", rd.Matcher(MatchAddress),
+			"cfws", rd.Matcher(MatchCFWS),
 		)
 		if address != nil {
 			cs = rcs
@@ -1024,6 +1054,9 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", c, "address", address), cs
 	})
+	if tail == nil {
+		return nil, nil
+	}
 
 	return rd.BuildMatch(TObsAddrList, "", bf, "head", head, "tail", tail), cs
 }
@@ -1101,15 +1134,18 @@ func MatchObsDomain(cs []byte) (*rd.Match, []byte) {
 
 		return rd.BuildMatch(rd.TLiteral, "", p, "atom", a), cs
 	})
+	if tail == nil {
+		return nil, nil
+	}
 
-	return rd.BuildMatch(TObsDomain, "head", head, "tail", tail), cs
+	return rd.BuildMatch(rd.TLiteral, "head", head, "tail", tail), cs
 }
 
 // obs-dtext       =   obs-NO-WS-CTL / quoted-pair
 
 func MatchObsDText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		"obs-no-ws-ctl", MatchObsNoWSCtl,
-		"quoted-pair", MatchQuotedPair,
+		"obs-no-ws-ctl", rd.Matcher(MatchObsNoWSCtl),
+		"quoted-pair", rd.Matcher(MatchQuotedPair),
 	)
 }
