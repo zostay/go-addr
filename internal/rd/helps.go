@@ -22,7 +22,7 @@ const (
 	TLast
 )
 
-const trace = true
+const trace = false
 
 func Trace(fmt string, args ...interface{}) {
 	if trace {

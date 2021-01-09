@@ -60,9 +60,10 @@ func MatchMailbox(cs []byte) (*rd.Match, []byte) {
 func MatchNameAddr(cs []byte) (*rd.Match, []byte) {
 	var (
 		dn, aa *rd.Match
+		rcs    []byte
 	)
 
-	if dn, rcs := MatchDisplayName(cs); dn != nil {
+	if dn, rcs = MatchDisplayName(cs); dn != nil {
 		cs = rcs
 	}
 
@@ -87,9 +88,10 @@ func MatchAngleAddr(cs []byte) (*rd.Match, []byte) {
 func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 	var (
 		cfws1, la, as, ra, cfws2 *rd.Match
+		rcs                      []byte
 	)
 
-	if cfws1, rcs := MatchCFWS(cs); cfws1 != nil {
+	if cfws1, rcs = MatchCFWS(cs); cfws1 != nil {
 		cs = rcs
 	}
 
@@ -108,7 +110,7 @@ func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if cfws2, rcs := MatchCFWS(cs); cfws2 != nil {
+	if cfws2, rcs = MatchCFWS(cs); cfws2 != nil {
 		cs = rcs
 	}
 
@@ -120,6 +122,7 @@ func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 func MatchGroup(cs []byte) (*rd.Match, []byte) {
 	var (
 		dn, c, gl, s *rd.Match
+		rcs          []byte
 	)
 
 	dn, cs = MatchDisplayName(cs)
@@ -132,7 +135,7 @@ func MatchGroup(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if gl, rcs := MatchGroupList(cs); gl != nil {
+	if gl, rcs = MatchGroupList(cs); gl != nil {
 		cs = rcs
 	}
 
@@ -246,8 +249,9 @@ func MatchDomain(cs []byte) (*rd.Match, []byte) {
 func MatchDomainLiteral(cs []byte) (*rd.Match, []byte) {
 	var (
 		pl, lb, lit, rb *rd.Match
+		rcs             []byte
 	)
-	if pl, rcs := MatchCFWS(cs); pl != nil {
+	if pl, rcs = MatchCFWS(cs); pl != nil {
 		cs = rcs
 	}
 
@@ -282,9 +286,10 @@ func MatchDomainLiteralLiteral(cs []byte) (*rd.Match, []byte) {
 func MatchDomainLiteralLiteralLiteral(cs []byte) (*rd.Match, []byte) {
 	var (
 		fws, dtext *rd.Match
+		rcs        []byte
 	)
 
-	if fws, rcs := MatchFWS(cs); fws != nil {
+	if fws, rcs = MatchFWS(cs); fws != nil {
 		cs = rcs
 	}
 
@@ -371,9 +376,10 @@ func MatchAText(cs []byte) (*rd.Match, []byte) {
 func MatchAtom(cs []byte) (*rd.Match, []byte) {
 	var (
 		pre, at, post *rd.Match
+		rcs           []byte
 	)
 
-	if pre, rcs := MatchCFWS(cs); pre != nil {
+	if pre, rcs = MatchCFWS(cs); pre != nil {
 		cs = rcs
 	}
 
@@ -382,7 +388,7 @@ func MatchAtom(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if post, rcs := MatchCFWS(cs); post != nil {
+	if post, rcs = MatchCFWS(cs); post != nil {
 		cs = rcs
 	}
 
@@ -403,9 +409,10 @@ func MatchDotAtomText(cs []byte) (*rd.Match, []byte) {
 func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 	var (
 		pre, at, post *rd.Match
+		rcs           []byte
 	)
 
-	if pre, rcs := MatchCFWS(cs); pre != nil {
+	if pre, rcs = MatchCFWS(cs); pre != nil {
 		cs = rcs
 	}
 
@@ -414,7 +421,7 @@ func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if post, rcs := MatchCFWS(cs); post != nil {
+	if post, rcs = MatchCFWS(cs); post != nil {
 		cs = rcs
 	}
 
@@ -434,9 +441,10 @@ func MatchFWS(cs []byte) (*rd.Match, []byte) {
 func MatchCurFWS(cs []byte) (*rd.Match, []byte) {
 	var (
 		wspcrlf, wsp *rd.Match
+		rcs          []byte
 	)
 
-	if wspcrlf, rcs := MatchCurFWSPre(cs); wspcrlf != nil {
+	if wspcrlf, rcs = MatchCurFWSPre(cs); wspcrlf != nil {
 		cs = rcs
 	}
 
@@ -451,9 +459,10 @@ func MatchCurFWS(cs []byte) (*rd.Match, []byte) {
 func MatchCurFWSPre(cs []byte) (*rd.Match, []byte) {
 	var (
 		wsp, crlf *rd.Match
+		rcs       []byte
 	)
 
-	if wsp, rcs := rd.MatchMany(rd.TLiteral, cs, 0, rfc5234.MatchWSP); wsp != nil {
+	if wsp, rcs = rd.MatchMany(rd.TLiteral, cs, 0, rfc5234.MatchWSP); wsp != nil {
 		cs = rcs
 	}
 
@@ -499,7 +508,8 @@ func MatchCContent(cs []byte) (*rd.Match, []byte) {
 
 func MatchComment(cs []byte) (*rd.Match, []byte) {
 	var (
-		lp, cc, rp *rd.Match
+		lp, cc, fws, rp *rd.Match
+		rcs             []byte
 	)
 
 	lp, cs = rd.MatchOneRune(rd.TLiteral, cs, '(')
@@ -512,7 +522,7 @@ func MatchComment(cs []byte) (*rd.Match, []byte) {
 			fws, cc *rd.Match
 		)
 
-		if fws, rcs := MatchFWS(cs); fws != nil {
+		if fws, rcs = MatchFWS(cs); fws != nil {
 			cs = rcs
 		}
 
@@ -524,7 +534,7 @@ func MatchComment(cs []byte) (*rd.Match, []byte) {
 		return rd.BuildMatch(rd.TNone, "", fws, "ccontent", cc), cs
 	})
 
-	if fws, rcs := MatchFWS(cs); fws != nil {
+	if fws, rcs = MatchFWS(cs); fws != nil {
 		cc.Content = append(cc.Content, fws.Content...)
 		cs = rcs
 	}
@@ -549,14 +559,16 @@ func MatchCFWS(cs []byte) (*rd.Match, []byte) {
 func MatchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
 	var (
 		pres, post *rd.Match
+		rcs        []byte
 	)
 
 	pres, cs = rd.MatchMany(rd.TNone, cs, 1, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			pre, comment *rd.Match
+			rcs          []byte
 		)
 
-		if pre, rcs := MatchFWS(cs); pre != nil {
+		if pre, rcs = MatchFWS(cs); pre != nil {
 			cs = rcs
 		}
 
@@ -571,7 +583,7 @@ func MatchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if post, rcs := MatchFWS(cs); post != nil {
+	if post, rcs = MatchFWS(cs); post != nil {
 		cs = rcs
 	}
 
@@ -649,10 +661,11 @@ func MatchQContent(cs []byte) (*rd.Match, []byte) {
 
 func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 	var (
-		cfws1, ldq, qc, rdq, cfws2 *rd.Match
+		cfws1, ldq, qc, fws, rdq, cfws2 *rd.Match
+		rcs                             []byte
 	)
 
-	if cfws1, rcs := MatchCFWS(cs); cfws1 != nil {
+	if cfws1, rcs = MatchCFWS(cs); cfws1 != nil {
 		cs = rcs
 	}
 
@@ -664,9 +677,10 @@ func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 	qc, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			fws, qc *rd.Match
+			rcs     []byte
 		)
 
-		if fws, rcs := MatchFWS(cs); fws != nil {
+		if fws, rcs = MatchFWS(cs); fws != nil {
 			cs = rcs
 		}
 
@@ -681,7 +695,7 @@ func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if fws, rcs := MatchFWS(cs); fws != nil {
+	if fws, rcs = MatchFWS(cs); fws != nil {
 		cs = rcs
 		qc.Content = append(qc.Content, fws.Content...)
 	}
@@ -805,9 +819,9 @@ func MatchQuotedPair(cs []byte) (*rd.Match, []byte) {
 
 			ch, cs = rd.MatchLongest(cs,
 				"vchar",
-				rfc5234.MatchVChar,
+				rd.Matcher(rfc5234.MatchVChar),
 				"wsp",
-				rfc5234.MatchWSP,
+				rd.Matcher(rfc5234.MatchWSP),
 			)
 			if ch == nil {
 				return nil, nil
@@ -825,9 +839,10 @@ func MatchQuotedPair(cs []byte) (*rd.Match, []byte) {
 func MatchObsAngleAddr(cs []byte) (*rd.Match, []byte) {
 	var (
 		cfws1, la, rt, as, ra, cfws2 *rd.Match
+		rcs                          []byte
 	)
 
-	if cfws1, rcs := MatchCFWS(cs); cfws1 != nil {
+	if cfws1, rcs = MatchCFWS(cs); cfws1 != nil {
 		cs = rcs
 	}
 
@@ -851,7 +866,7 @@ func MatchObsAngleAddr(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if cfws2, rcs := MatchCFWS(cs); cfws2 != nil {
+	if cfws2, rcs = MatchCFWS(cs); cfws2 != nil {
 		cs = rcs
 	}
 
@@ -911,6 +926,7 @@ func MatchObsDomainList(cs []byte) (*rd.Match, []byte) {
 	tail, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			c, cfws, at, d *rd.Match
+			rcs            []byte
 		)
 
 		c, cs = rd.MatchOneRune(rd.TLiteral, cs, ',')
@@ -918,17 +934,17 @@ func MatchObsDomainList(cs []byte) (*rd.Match, []byte) {
 			return nil, nil
 		}
 
-		if cfws, rcs := MatchCFWS(cs); cfws != nil {
+		if cfws, rcs = MatchCFWS(cs); cfws != nil {
 			cs = rcs
 		}
 
-		if at, rcs := rd.MatchOneRune(rd.TLiteral, cs, '@'); at != nil {
+		if at, rcs = rd.MatchOneRune(rd.TLiteral, cs, '@'); at != nil {
 			cs = rcs
 		} else {
 			return rd.BuildMatch(rd.TLiteral, "", c, "", cfws), cs
 		}
 
-		if d, rcs := MatchDomain(cs); d != nil {
+		if d, rcs = MatchDomain(cs); d != nil {
 			cs = rcs
 		}
 
@@ -951,9 +967,10 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 	bf, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			cfws, c *rd.Match
+			rcs     []byte
 		)
 
-		if cfws, rcs := MatchCFWS(cs); cfws != nil {
+		if cfws, rcs = MatchCFWS(cs); cfws != nil {
 			cs = rcs
 		}
 
@@ -976,6 +993,7 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 	tail, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			c, mb *rd.Match
+			rcs   []byte
 		)
 
 		c, cs = rd.MatchOneRune(rd.TLiteral, cs, ',')
@@ -983,7 +1001,7 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 			return nil, nil
 		}
 
-		mb, rcs := rd.MatchLongest(cs,
+		mb, rcs = rd.MatchLongest(cs,
 			"mailbox",
 			rd.Matcher(MatchMailbox),
 			"cfws",
@@ -1012,9 +1030,10 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 	bf, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			cfws, c *rd.Match
+			rcs     []byte
 		)
 
-		if cfws, rcs := MatchCFWS(cs); cfws != nil {
+		if cfws, rcs = MatchCFWS(cs); cfws != nil {
 			cs = rcs
 		}
 
@@ -1037,6 +1056,7 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 	tail, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			c, address *rd.Match
+			rcs        []byte
 		)
 
 		c, cs = rd.MatchOneRune(rd.TLiteral, cs, ',')
@@ -1044,7 +1064,7 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 			return nil, nil
 		}
 
-		address, rcs := rd.MatchLongest(cs,
+		address, rcs = rd.MatchLongest(cs,
 			"address", rd.Matcher(MatchAddress),
 			"cfws", rd.Matcher(MatchCFWS),
 		)
@@ -1066,14 +1086,16 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 func MatchObsGroupList(cs []byte) (*rd.Match, []byte) {
 	var (
 		head, tail *rd.Match
+		rcs        []byte
 	)
 
 	head, cs = rd.MatchMany(rd.TLiteral, cs, 1, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			cfws, c *rd.Match
+			rcs     []byte
 		)
 
-		if cfws, rcs := MatchCFWS(cs); cfws != nil {
+		if cfws, rcs = MatchCFWS(cs); cfws != nil {
 			cs = rcs
 		}
 
@@ -1088,7 +1110,7 @@ func MatchObsGroupList(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if tail, rcs := MatchCFWS(cs); tail != nil {
+	if tail, rcs = MatchCFWS(cs); tail != nil {
 		cs = rcs
 	}
 
