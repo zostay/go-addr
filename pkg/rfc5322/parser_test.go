@@ -89,7 +89,7 @@ func TestMatchGroupHappy(t *testing.T) {
 func TestMatchDisplayNameHappy(t *testing.T) {
 	t.Parallel()
 
-	mb := "\"ABC 123\""
+	mb := "\"ABC 123\" "
 
 	m, cs := MatchDisplayName([]byte(mb))
 	assert.NotNil(t, m)
@@ -219,7 +219,7 @@ func TestMatchWordHappyAtom(t *testing.T) {
 func TestMatchPhraseHappyWords(t *testing.T) {
 	t.Parallel()
 
-	mb := "abc 123 !#$ \"foo bar baz\""
+	mb := "abc 123 !#$ \"foo bar baz\" "
 
 	m, cs := MatchPhrase([]byte(mb))
 	assert.NotNil(t, m)
@@ -245,7 +245,7 @@ func TestMatchATextHappy(t *testing.T) {
 func TestMatchAtomHappy(t *testing.T) {
 	t.Parallel()
 
-	mb := "abc!#$"
+	mb := "abc!#$ "
 
 	m, cs := MatchAtom([]byte(mb))
 	assert.NotNil(t, m)
@@ -343,6 +343,19 @@ func TestMatchCFWSHappyCFWSWithComment(t *testing.T) {
 
 	assert.Empty(t, cs)
 	assert.Equal(t, TCFWS, m.Tag)
+	assert.Equal(t, []byte(mb), m.Content)
+}
+
+func TestMatchCFWSHappyFWS(t *testing.T) {
+	t.Parallel()
+
+	mb := " "
+
+	m, cs := MatchCFWS([]byte(mb))
+	assert.NotNil(t, m)
+
+	assert.Empty(t, cs)
+	assert.Equal(t, TFWS, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 

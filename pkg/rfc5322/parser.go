@@ -705,11 +705,11 @@ func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	if cfws2, rcs := MatchCFWS(cs); cfws2 != nil {
+	if cfws2, rcs = MatchCFWS(cs); cfws2 != nil {
 		cs = rcs
 	}
 
-	return rd.BuildMatch(TQuotedString, "", cfws1, "", ldq, "quoted-string", qc, "", rdq, "", cfws2), cs
+	return rd.BuildMatch(TQuotedString, "", cfws1, "", ldq, "quoted-string", qc, "", fws, "", rdq, "", cfws2), cs
 }
 
 // obs-NO-WS-CTL   =   %d1-8 /            ; US-ASCII control
