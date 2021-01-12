@@ -222,19 +222,12 @@ func accumulateComments(m *rd.Match) string {
 
 func accumulateCommentsInner(m *rd.Match) (string, bool) {
 	switch m.Tag {
-	case p.TCContent:
+	case p.TCContents:
 		return string(m.Content), true
-	case rd.TNone:
-		return "", false
 	default:
 		cs := make([]string, 0)
 		for _, sm := range m.Submatch {
 			if c, ok := accumulateCommentsInner(sm); ok {
-				cs = append(cs, c)
-			}
-		}
-		for _, gm := range m.Group {
-			if c, ok := accumulateCommentsInner(gm); ok {
 				cs = append(cs, c)
 			}
 		}

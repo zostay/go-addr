@@ -103,6 +103,16 @@ func TestMatchCRLFHappy(t *testing.T) {
 		Tag:     rd.TLiteral,
 		Content: []byte("\r\n"),
 		Group:   map[string]*rd.Match{},
+		Submatch: []*rd.Match{
+			&rd.Match{
+				Tag:     rd.TLiteral,
+				Content: []byte{'\r'},
+			},
+			&rd.Match{
+				Tag:     rd.TLiteral,
+				Content: []byte{'\n'},
+			},
+		},
 	}, m)
 }
 

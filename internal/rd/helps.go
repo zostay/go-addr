@@ -40,6 +40,7 @@ func (m *Match) Length() int {
 
 func BuildMatch(t ATag, ms ...interface{}) (m *Match) {
 	g := make(map[string]*Match, len(ms)/2)
+	s := make([]*Match, 0, len(ms)/2)
 	c := make([]byte, 0)
 	var n string
 	for i, x := range ms {
@@ -49,11 +50,12 @@ func BuildMatch(t ATag, ms ...interface{}) (m *Match) {
 			if n != "" {
 				g[n] = x.(*Match)
 			}
+			s = append(s, x.(*Match))
 			c = append(c, x.(*Match).Content...)
 		}
 	}
 
-	m = &Match{Tag: t, Content: c, Group: g}
+	m = &Match{Tag: t, Content: c, Group: g, Submatch: s}
 	//Trace("BuildMatch(%+v)", m)
 
 	return

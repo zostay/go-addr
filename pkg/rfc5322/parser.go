@@ -19,7 +19,6 @@ const (
 	TDotAtom
 	TCText
 	TCContents
-	TCContent
 	TComment
 	TQuotedString
 	TObsQP
