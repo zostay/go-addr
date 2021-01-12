@@ -141,7 +141,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = a.String()
 	case p.TWords:
 		var a strings.Builder
-		for _, w := range m.Group {
+		for _, w := range m.Submatch {
 			a.WriteString(w.Made.(string))
 		}
 		m.Made = a.String()
