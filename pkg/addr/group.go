@@ -35,6 +35,7 @@ func (g *Group) CleanString() string {
 			a.WriteString(", ")
 		}
 		a.WriteString(mb.CleanString())
+		first = false
 	}
 	a.WriteString(";")
 	return a.String()
@@ -46,26 +47,26 @@ type GroupList []*Group
 
 func (gs GroupList) OriginalString() string {
 	var a strings.Builder
-	first := true
+	comma := false
 	for _, g := range gs {
-		if !first {
+		if comma {
 			a.WriteString(", ")
 		}
 		a.WriteString(g.OriginalString())
-		first = false
+		comma = true
 	}
 	return a.String()
 }
 
 func (gs GroupList) CleanString() string {
 	var a strings.Builder
-	first := true
+	comma := false
 	for _, g := range gs {
-		if !first {
+		if comma {
 			a.WriteString(", ")
 		}
 		a.WriteString(g.CleanString())
-		first = false
+		comma = true
 	}
 	return a.String()
 }
