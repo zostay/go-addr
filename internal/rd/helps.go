@@ -81,8 +81,8 @@ func MatchOne(t ATag, cs []byte, pred func(c byte) bool) (*Match, []byte) {
 	return nil, nil
 }
 
-func SelectLongest(ms map[string]*Match) string {
-	var ln string
+func SelectLongest(ms []*Match) int {
+	var ln int
 	var lm *Match
 
 	for n, m := range ms {
@@ -100,25 +100,19 @@ func MatchOneRune(t ATag, cs []byte, c rune) (*Match, []byte) {
 	return MatchOne(t, cs, func(b byte) bool { return b == byte(c) })
 }
 
-func MatchLongest(cs []byte, ms ...interface{}) (*Match, []byte) {
-	msm := make(map[string]*Match, len(ms)/2)
-	msr := make(map[string][]byte, len(ms)/2)
+func MatchLongest(cs []byte, ms ...Matcher) (*Match, []byte) {
+	msm := make([]*Match, len(ms))
+	msr := make([][]byte, len(ms))
 
-	var n string
-	for i, x := range ms {
-		if i%2 == 0 {
-			n = x.(string)
-		} else {
-			mp := x.(Matcher)
-			if m, csr := mp(cs); m != nil {
-				msm[n] = m
-				msr[n] = csr
-			}
+	for i, mp := range ms {
+		if m, csr := mp(cs); m != nil {
+			msm[i] = m
+			msr[i] = csr
 		}
 	}
 
-	if w := SelectLongest(msm); w != "" {
-		Trace("GOT MatchLongest(%v) = (%s, %v)", string(cs), w, msm[w])
+	if w := SelectLongest(msm); w != -1 {
+		Trace("GOT MatchLongest(%v) = (%d, %v)", string(cs), w, msm[w])
 		return msm[w], msr[w]
 	}
 
