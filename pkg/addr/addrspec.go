@@ -43,15 +43,15 @@ func NewAddrSpecParsed(lp, d, o string) *AddrSpec {
 func ParseEmailAddrSpec(a string) (*AddrSpec, error) {
 	m, cs := rfc5322.MatchAddrSpec([]byte(a))
 
-	var address AddrSpec
+	var address *AddrSpec
 	err := ApplyActions(m, &address)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(cs) > 0 {
-		return &address, ErrPartialParse
+		return address, ErrPartialParse
 	}
 
-	return &address, nil
+	return address, nil
 }

@@ -136,7 +136,7 @@ func (m *Mailbox) CleanString() string {
 	// obsolete RFC822 display name instead in that case. Since we don't make
 	// any effort to understand or decode these, we assume we'll just encounter
 	// them as-is but do this one special thing for them
-	if m.displayName == "" {
+	if m.displayName != "" {
 		if format.HasMIMEWord(m.displayName) {
 			a.WriteString(m.displayName)
 		} else {
