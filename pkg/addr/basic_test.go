@@ -39,4 +39,9 @@ func TestBasic(t *testing.T) {
 	assert.Equal(t, "user", mb.AddrSpec().LocalPart())
 	assert.Equal(t, "oceania", mb.AddrSpec().Domain())
 	assert.Empty(t, mb.Comment())
+	assert.Equal(t, "user <user@oceania>", mb.OriginalString())
+	assert.Equal(t, "user <user@oceania>", mb.CleanString())
+
+	assert.Equal(t, str, email.OriginalString())
+	assert.Equal(t, str, email.CleanString())
 }

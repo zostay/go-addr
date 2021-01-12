@@ -90,7 +90,7 @@ func applyThisAction(m *rd.Match) (err error) {
 			dn,
 			m.Group["angle-addr"].Made.(*AddrSpec),
 			c,
-			string(m.Content),
+			strings.TrimSpace(string(m.Content)),
 		)
 		if err != nil {
 			return
@@ -108,7 +108,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = NewGroupParsed(
 			m.Group["display-name"].Made.(string),
 			mbl,
-			string(m.Content),
+			strings.TrimSpace(string(m.Content)),
 		)
 	case p.TDisplayName:
 		m.Made = strings.TrimSpace(m.Group["phrase"].Made.(string))
@@ -128,7 +128,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = NewAddrSpecParsed(
 			m.Group["local-part"].Made.(string),
 			m.Group["domain"].Made.(string),
-			string(m.Content),
+			strings.TrimSpace(string(m.Content)),
 		)
 	case p.TDomainLiteral:
 		var a strings.Builder
