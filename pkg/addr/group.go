@@ -93,19 +93,3 @@ func ParseEmailGroup(a string) (*Group, error) {
 
 	return &group, nil
 }
-
-func ParseEmailGroupList(a string) (GroupList, error) {
-	m, cs := rfc5322.MatchGroupList([]byte(a))
-
-	groups := make(GroupList, 0)
-	err := ApplyActions(m, groups)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(cs) > 0 {
-		return groups, ErrPartialParse
-	}
-
-	return groups, nil
-}
