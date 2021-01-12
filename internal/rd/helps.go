@@ -30,7 +30,13 @@ func Trace(fmt string, args ...interface{}) {
 	}
 }
 
-func (m *Match) Length() int { return len(m.Content) }
+func (m *Match) Length() int {
+	if m != nil {
+		return len(m.Content)
+	} else {
+		return 0
+	}
+}
 
 func BuildMatch(t ATag, ms ...interface{}) (m *Match) {
 	g := make(map[string]*Match, len(ms)/2)
