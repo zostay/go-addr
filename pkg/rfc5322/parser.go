@@ -17,16 +17,12 @@ const (
 	TWords
 	TAtom
 	TDotAtom
-	TFWS
 	TCText
 	TCContents
 	TCContent
 	TComment
-	TCFWS
-	TObsFWS
 	TQuotedString
 	TObsQP
-	TObsPhrase
 	TObsAngleAddr
 	TObsRoute
 	TObsDomainList
@@ -450,7 +446,7 @@ func MatchCurFWS(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	return rd.BuildMatch(TFWS, "", wspcrlf, "", wsp), cs
+	return rd.BuildMatch(rd.TLiteral, "", wspcrlf, "", wsp), cs
 }
 
 func MatchCurFWSPre(cs []byte) (*rd.Match, []byte) {
@@ -584,7 +580,7 @@ func MatchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
 		cs = rcs
 	}
 
-	return rd.BuildMatch(TCFWS, "pres", pres, "post", post), cs
+	return rd.BuildMatch(rd.TLiteral, "pres", pres, "post", post), cs
 }
 
 // obs-FWS         =   1*WSP *(CRLF 1*WSP)
@@ -620,7 +616,7 @@ func MatchObsFWS(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	return rd.BuildMatch(TObsFWS, "wsp", wsp, "crlfs", crlfs), cs
+	return rd.BuildMatch(rd.TLiteral, "wsp", wsp, "crlfs", crlfs), cs
 }
 
 // qtext           =   %d33 /             ; Printable US-ASCII
@@ -787,7 +783,7 @@ func MatchObsPhrase(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	return rd.BuildMatch(TObsPhrase, "head", head, "tail", tail), cs
+	return rd.BuildMatch(rd.TLiteral, "head", head, "tail", tail), cs
 }
 
 // quoted-pair     =   ("\\" (VCHAR / WSP)) / obs-qp

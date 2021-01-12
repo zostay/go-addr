@@ -290,7 +290,7 @@ func TestMatchFWSHappyCur(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, TFWS, m.Tag)
+	assert.Equal(t, rd.TLiteral, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -342,7 +342,7 @@ func TestMatchCFWSHappyCFWSWithComment(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, TCFWS, m.Tag)
+	assert.Equal(t, rd.TLiteral, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -355,7 +355,7 @@ func TestMatchCFWSHappyFWS(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, TFWS, m.Tag)
+	assert.Equal(t, rd.TLiteral, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -368,7 +368,7 @@ func TestMatchObsFWSHappy(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, TObsFWS, m.Tag)
+	assert.Equal(t, rd.TLiteral, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -472,7 +472,7 @@ func TestMatchObsPhraseHappy(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, TObsPhrase, m.Tag)
+	assert.Equal(t, rd.TLiteral, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
