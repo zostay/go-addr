@@ -37,15 +37,19 @@ func ApplyActions(m *rd.Match, mk interface{}) error {
 	}
 
 	mkrv := reflect.ValueOf(mk)
-	if mkrv.Kind() != reflect.Ptr {
-		return errors.New("ApplyActions expects a pointer or nil as the second argument")
-	}
-
 	mdrv := reflect.ValueOf(m.Made)
-	if mkrv.Elem().CanSet() && mkrv.Elem().Type() == mdrv.Type() {
-		mkrv.Elem().Set(mdrv)
-	} else {
-		return fmt.Errorf("ApplyActions expected pointer to %s type but got pointer to %s type", mdrv.Type(), mkrv.Elem().Type())
+
+	switch mkrv.Kind() {
+	case reflect.Ptr:
+		if mkrv.Elem().CanSet() && mkrv.Elem().Type() == mdrv.Type() {
+			mkrv.Elem().Set(mdrv)
+		} else {
+			return fmt.Errorf("ApplyActions expected pointer to %s type but got pointer to %s type", mdrv.Type(), mkrv.Elem().Type())
+		}
+	case reflect.Slice:
+		reflect.Copy(mkrv, mdrv)
+	default:
+		return errors.New("ApplyActions expects a pointer or slice or nil as the second argument")
 	}
 
 	return nil
