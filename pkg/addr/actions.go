@@ -166,7 +166,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		}
 		m.Made = a.String()
 	case p.TQuotedString:
-		m.Made = string(unquotePairs([]byte(m.Group["qcontent"].Made.(string))))
+		m.Made = string(unquotePairs([]byte(m.Group["quoted-string"].Made.(string))))
 	case p.TComment:
 		m.Made = string(unquotePairs(m.Group["comment-content"].Content))
 	}
@@ -199,7 +199,7 @@ func init() {
 
 func unquotePairs(x []byte) []byte {
 	output := make([]byte, 0, len(x))
-	escaping := true
+	escaping := false
 	for _, c := range x {
 		if escaping {
 			escaping = false
