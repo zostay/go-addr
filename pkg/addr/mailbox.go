@@ -180,8 +180,8 @@ func ParseEmailMailbox(a string) (*Mailbox, error) {
 func ParseEmailMailboxList(a string) (MailboxList, error) {
 	m, cs := rfc5322.MatchMailboxList([]byte(a))
 
-	mailboxes := make(MailboxList, 0)
-	err := ApplyActions(m, mailboxes)
+	var mailboxes MailboxList
+	err := ApplyActions(m, &mailboxes)
 	if err != nil {
 		return nil, err
 	}

@@ -46,8 +46,6 @@ func ApplyActions(m *rd.Match, mk interface{}) error {
 		} else {
 			return fmt.Errorf("ApplyActions expected pointer to %s type but got pointer to %s type", mdrv.Type(), mkrv.Elem().Type())
 		}
-	case reflect.Slice:
-		reflect.Copy(mkrv, mdrv)
 	default:
 		return errors.New("ApplyActions expects a pointer or slice or nil as the second argument")
 	}
@@ -113,7 +111,7 @@ func applyThisAction(m *rd.Match) (err error) {
 			string(m.Content),
 		)
 	case p.TDisplayName:
-		m.Made = m.Group["phrase"].Made
+		m.Made = strings.TrimSpace(m.Group["phrase"].Made.(string))
 	case p.TMailboxList:
 		mailboxes := make(MailboxList, len(m.Submatch))
 		for i, mb := range m.Submatch {

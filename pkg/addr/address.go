@@ -60,8 +60,8 @@ func ParseEmailAddress(a string) (Address, error) {
 func ParseEmailAddressList(a string) (AddressList, error) {
 	m, cs := rfc5322.MatchAddressList([]byte(a))
 
-	addresses := make(AddressList, 0)
-	err := ApplyActions(m, addresses)
+	var addresses AddressList
+	err := ApplyActions(m, &addresses)
 	if err != nil {
 		return nil, err
 	}
