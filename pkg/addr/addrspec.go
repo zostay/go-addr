@@ -32,6 +32,13 @@ func (as *AddrSpec) CleanString() string {
 
 func (as *AddrSpec) String() string { return as.OriginalString() }
 
+func NewAddrSpec(lp, d string) *AddrSpec {
+	return &AddrSpec{
+		localPart: lp,
+		domain:    d,
+	}
+}
+
 func NewAddrSpecParsed(lp, d, o string) *AddrSpec {
 	return &AddrSpec{
 		localPart: lp,
