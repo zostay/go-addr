@@ -147,7 +147,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		if err != nil {
 			return
 		}
-	case p.TAngleAddr:
+	case p.TAngleAddr, p.TObsAngleAddr:
 		m.Made = m.Group["addr-spec"].Made
 	case p.TGroup:
 		var mbl MailboxList
@@ -170,6 +170,28 @@ func applyThisAction(m *rd.Match) (err error) {
 			mailboxes[i] = mb.Made.(*Mailbox)
 		}
 		m.Made = mailboxes
+	case p.TObsMboxList:
+		gh := m.Group["head"]
+		gt := m.Group["tail"]
+		mailboxes := make(MailboxList, 1+len(gt.Made.(MailboxList)))
+		mailboxes[0] = gh.Made.(*Mailbox)
+		mailboxes = append(mailboxes, gt.Made.(MailboxList)...)
+		m.Made = mailboxes
+	case p.TObsMboxTailList:
+		mailboxes := make(MailboxList, 0, len(m.Submatch))
+		for _, mbo := range m.Submatch {
+			if mb, ok := mbo.Made.(*Mailbox); ok {
+				mailboxes = append(mailboxes, mb)
+			}
+		}
+		m.Made = mailboxes
+	case p.TObsMboxOptionalList:
+		gmb := m.Group["mb"]
+		if gmb != nil {
+			if mb, ok := gmb.Made.(*Mailbox); ok {
+				m.Made = mb
+			}
+		}
 	case p.TAddressList:
 		addresses := make(AddressList, len(m.Submatch))
 		for i, a := range m.Submatch {
