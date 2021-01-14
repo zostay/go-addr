@@ -171,7 +171,7 @@ func ParseEmailMailbox(a string) (*Mailbox, error) {
 	}
 
 	if len(cs) > 0 {
-		return &mailbox, ErrPartialParse
+		return &mailbox, PartialParseError{string(cs)}
 	}
 
 	return &mailbox, nil
@@ -187,7 +187,7 @@ func ParseEmailMailboxList(a string) (MailboxList, error) {
 	}
 
 	if len(cs) > 0 {
-		return mailboxes, ErrPartialParse
+		return mailboxes, PartialParseError{string(cs)}
 	}
 
 	return mailboxes, nil

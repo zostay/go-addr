@@ -89,7 +89,7 @@ func ParseEmailGroup(a string) (*Group, error) {
 	}
 
 	if len(cs) > 0 {
-		return &group, ErrPartialParse
+		return &group, PartialParseError{string(cs)}
 	}
 
 	return &group, nil

@@ -57,7 +57,7 @@ func ParseEmailAddrSpec(a string) (*AddrSpec, error) {
 	}
 
 	if len(cs) > 0 {
-		return address, ErrPartialParse
+		return address, PartialParseError{string(cs)}
 	}
 
 	return address, nil

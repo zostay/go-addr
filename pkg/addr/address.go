@@ -51,7 +51,7 @@ func ParseEmailAddress(a string) (Address, error) {
 	}
 
 	if len(cs) > 0 {
-		return address, ErrPartialParse
+		return address, PartialParseError{string(cs)}
 	}
 
 	return address, nil
@@ -67,7 +67,7 @@ func ParseEmailAddressList(a string) (AddressList, error) {
 	}
 
 	if len(cs) > 0 {
-		return addresses, ErrPartialParse
+		return addresses, PartialParseError{string(cs)}
 	}
 
 	return addresses, nil
