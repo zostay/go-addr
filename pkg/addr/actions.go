@@ -3,16 +3,10 @@ package addr
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/zostay/go-addr/internal/rd"
 	p "github.com/zostay/go-addr/pkg/rfc5322"
-)
-
-var (
-	ErrPartialParse = errors.New("incomplete parsing of email address")
 )
 
 func ApplyActions(m *rd.Match, mk interface{}) error {
@@ -28,26 +22,84 @@ func ApplyActions(m *rd.Match, mk interface{}) error {
 		return err
 	}
 
+	return passThroughMadeObject(m.Made, mk)
+}
+
+func passThroughMadeObject(m, mk interface{}) error {
 	if mk == nil {
 		return nil
 	}
 
-	if m.Made == nil {
+	if m == nil {
 		return errors.New("parse construction error")
 	}
 
-	mkrv := reflect.ValueOf(mk)
-	mdrv := reflect.ValueOf(m.Made)
-
-	switch mkrv.Kind() {
-	case reflect.Ptr:
-		if mkrv.Elem().CanSet() && mkrv.Elem().Type() == mdrv.Type() {
-			mkrv.Elem().Set(mdrv)
-		} else {
-			return fmt.Errorf("ApplyActions expected pointer to %s type but got pointer to %s type", mdrv.Type(), mkrv.Elem().Type())
+	switch mv := m.(type) {
+	case *Mailbox:
+		switch mkv := mk.(type) {
+		case *Address:
+			*mkv = mv
+		case **Mailbox:
+			*mkv = mv
+		case **AddrSpec:
+			*mkv = mv.address
+		default:
+			return errors.New("type mismatch")
+		}
+	case MailboxList:
+		switch mkv := mk.(type) {
+		case *AddressList:
+			*mkv = make(AddressList, len(mv))
+			for i, v := range mv {
+				(*mkv)[i] = v
+			}
+		case *MailboxList:
+			*mkv = mv
+		default:
+			return errors.New("type mismatch")
+		}
+	case AddressList:
+		switch mkv := mk.(type) {
+		case *AddressList:
+			*mkv = mv
+		default:
+			return errors.New("type mismatch")
+		}
+	case *Group:
+		switch mkv := mk.(type) {
+		case *Address:
+			*mkv = mv
+		case **Group:
+			*mkv = mv
+		default:
+			return errors.New("type mismatch")
+		}
+	case *AddrSpec:
+		switch mkv := mk.(type) {
+		case *Address:
+			*mkv = &Mailbox{
+				address:  mv,
+				original: mv.original,
+			}
+		case **Mailbox:
+			*mkv = &Mailbox{
+				address:  mv,
+				original: mv.original,
+			}
+		case **AddrSpec:
+			*mkv = mv
+		default:
+			return errors.New("type mismatch")
+		}
+	case string:
+		switch mkv := mk.(type) {
+		case *string:
+			*mkv = mv
+		default:
+			return errors.New("type mismatch")
 		}
 	default:
-		return errors.New("ApplyActions expects a pointer or slice or nil as the second argument")
+		return errors.New("unknown applied type")
 	}
 
 	return nil
