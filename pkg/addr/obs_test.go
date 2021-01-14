@@ -74,3 +74,18 @@ func TestObsGroup(t *testing.T) {
 		original:    str,
 	}, g)
 }
+
+func TestObsLocalPart(t *testing.T) {
+	const str = "\"words\".in.\"email\".are.\"obsolete\"@example.com"
+
+	t.Parallel()
+
+	ml, err := ParseEmailAddrSpec(str)
+	assert.NoError(t, err)
+
+	assert.Equal(t, &AddrSpec{
+		localPart: "words.in.email.are.obsolete",
+		domain:    "example.com",
+		original:  str,
+	}, ml)
+}

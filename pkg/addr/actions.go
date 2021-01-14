@@ -224,6 +224,17 @@ func applyThisAction(m *rd.Match) (err error) {
 				m.Made = mb
 			}
 		}
+	case p.TObsLocalPart:
+		var a strings.Builder
+		period := false
+		for _, l := range m.Submatch {
+			if period {
+				a.WriteRune('.')
+			}
+			a.WriteString(l.Made.(string))
+			period = true
+		}
+		m.Made = a.String()
 	case p.TAddrSpec:
 		m.Made = NewAddrSpecParsed(
 			m.Group["local-part"].Made.(string),
