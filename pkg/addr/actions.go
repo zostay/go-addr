@@ -198,6 +198,28 @@ func applyThisAction(m *rd.Match) (err error) {
 			addresses[i] = a.Made.(Address)
 		}
 		m.Made = addresses
+	case p.TObsAddrList:
+		gh := m.Group["head"]
+		gt := m.Group["tail"]
+		mailboxes := make(AddressList, 1+len(gt.Made.(AddressList)))
+		mailboxes[0] = gh.Made.(Address)
+		mailboxes = append(mailboxes, gt.Made.(AddressList)...)
+		m.Made = mailboxes
+	case p.TObsAddrTailList:
+		mailboxes := make(AddressList, 0, len(m.Submatch))
+		for _, mbo := range m.Submatch {
+			if mb, ok := mbo.Made.(Address); ok {
+				mailboxes = append(mailboxes, mb)
+			}
+		}
+		m.Made = mailboxes
+	case p.TObsAddrOptionalList:
+		gmb := m.Group["mb"]
+		if gmb != nil {
+			if mb, ok := gmb.Made.(Address); ok {
+				m.Made = mb
+			}
+		}
 	case p.TAddrSpec:
 		m.Made = NewAddrSpecParsed(
 			m.Group["local-part"].Made.(string),

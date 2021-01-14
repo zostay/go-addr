@@ -32,6 +32,8 @@ const (
 	TObsDomain
 	TObsMboxTailList
 	TObsMboxOptionalList
+	TObsAddrTailList
+	TObsAddrOptionalList
 )
 
 // address         =   mailbox / group
@@ -1030,7 +1032,7 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	tail, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
+	tail, cs = rd.MatchMany(TObsAddrTailList, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			c, address *rd.Match
 			rcs        []byte
@@ -1049,7 +1051,7 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 			cs = rcs
 		}
 
-		return rd.BuildMatch(rd.TLiteral, "", c, "address", address), cs
+		return rd.BuildMatch(TObsAddrOptionalList, "", c, "address", address), cs
 	})
 	if tail == nil {
 		return nil, nil

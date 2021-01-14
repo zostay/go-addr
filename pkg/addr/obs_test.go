@@ -35,3 +35,27 @@ func TestObsMboxList(t *testing.T) {
 		},
 	}, ml)
 }
+
+func TestObsAddrList(t *testing.T) {
+	const str = "meh: \"who\" <ok@example.com>;, (obsolete comment with no address)"
+
+	t.Parallel()
+
+	al, err := ParseEmailAddressList(str)
+	assert.NoError(t, err)
+
+	assert.Equal(t, AddressList{
+		&Group{
+			displayName: "meh",
+			mailboxList: MailboxList{
+				&Mailbox{
+					displayName: "who",
+					address:     &AddrSpec{"ok", "example.com", "ok@example.com"},
+					comment:     "",
+					original:    "\"who\" <ok@example.com>",
+				},
+			},
+			original: "meh: \"who\" <ok@example.com>;",
+		},
+	}, al)
+}
