@@ -248,6 +248,14 @@ func applyThisAction(m *rd.Match) (err error) {
 		a.Write(unfoldFWS(unquotePairs(m.Group["literal"].Content)))
 		a.WriteRune(']')
 		m.Made = a.String()
+	case p.TObsDomain:
+		var a strings.Builder
+		a.WriteString(strings.TrimSpace(m.Group["head"].Made.(string)))
+		for _, t := range m.Group["tail"].Submatch {
+			a.WriteRune('.')
+			a.WriteString(strings.TrimSpace(t.Group["atom"].Made.(string)))
+		}
+		m.Made = a.String()
 	case p.TWords:
 		var a strings.Builder
 		for _, w := range m.Submatch {
@@ -255,15 +263,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		}
 		m.Made = a.String()
 	case p.TAtom:
-		var a strings.Builder
-		if m.Group["pre"] != nil {
-			a.WriteString(m.Group["pre"].Made.(string))
-		}
-		a.Write(m.Group["atext"].Content)
-		if m.Group["post"] != nil {
-			a.WriteString(m.Group["post"].Made.(string))
-		}
-		m.Made = a.String()
+		m.Made = string(m.Group["atext"].Content)
 	case p.TDotAtom:
 		var a strings.Builder
 		if m.Group["pre"] != nil {

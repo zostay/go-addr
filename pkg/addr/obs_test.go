@@ -89,3 +89,18 @@ func TestObsLocalPart(t *testing.T) {
 		original:  str,
 	}, ml)
 }
+
+func TestObsDomain(t *testing.T) {
+	const str = "okay@obs . example. (comments!?)com"
+
+	t.Parallel()
+
+	ml, err := ParseEmailAddrSpec(str)
+	assert.NoError(t, err)
+
+	assert.Equal(t, &AddrSpec{
+		localPart: "okay",
+		domain:    "obs.example.com",
+		original:  str,
+	}, ml)
+}

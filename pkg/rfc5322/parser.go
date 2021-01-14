@@ -34,6 +34,8 @@ const (
 	TObsMboxOptionalList
 	TObsAddrTailList
 	TObsAddrOptionalList
+	TObsDomainTailList
+	TObsDomainOptionalList
 )
 
 // address         =   mailbox / group
@@ -1118,7 +1120,7 @@ func MatchObsDomain(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	tail, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
+	tail, cs = rd.MatchMany(TObsDomainTailList, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			p, a *rd.Match
 		)
@@ -1133,13 +1135,13 @@ func MatchObsDomain(cs []byte) (*rd.Match, []byte) {
 			return nil, nil
 		}
 
-		return rd.BuildMatch(rd.TLiteral, "", p, "atom", a), cs
+		return rd.BuildMatch(TObsDomainOptionalList, "", p, "atom", a), cs
 	})
 	if tail == nil {
 		return nil, nil
 	}
 
-	return rd.BuildMatch(rd.TLiteral, "head", head, "tail", tail), cs
+	return rd.BuildMatch(TObsDomain, "head", head, "tail", tail), cs
 }
 
 // obs-dtext       =   obs-NO-WS-CTL / quoted-pair
