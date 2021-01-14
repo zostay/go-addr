@@ -59,3 +59,18 @@ func TestObsAddrList(t *testing.T) {
 		},
 	}, al)
 }
+
+func TestObsGroup(t *testing.T) {
+	const str = "meh: (obsolete comments here), (obsolete comment there);"
+
+	t.Parallel()
+
+	g, err := ParseEmailGroup(str)
+	assert.NoError(t, err)
+
+	assert.Equal(t, &Group{
+		displayName: "meh",
+		mailboxList: MailboxList{},
+		original:    str,
+	}, g)
+}

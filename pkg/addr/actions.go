@@ -151,8 +151,12 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = m.Group["addr-spec"].Made
 	case p.TGroup:
 		var mbl MailboxList
-		if m.Group["group-list"] != nil {
-			mbl = m.Group["group-list"].Made.(MailboxList)
+		if ggl := m.Group["group-list"]; ggl != nil {
+			if ggl.Made != nil {
+				mbl = ggl.Made.(MailboxList)
+			} else {
+				mbl = MailboxList{}
+			}
 		} else {
 			mbl = MailboxList{}
 		}

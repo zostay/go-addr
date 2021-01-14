@@ -82,15 +82,15 @@ func NewGroupParsed(dn string, l MailboxList, o string) *Group {
 func ParseEmailGroup(a string) (*Group, error) {
 	m, cs := rfc5322.MatchGroup([]byte(a))
 
-	var group Group
+	var group *Group
 	err := ApplyActions(m, &group)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(cs) > 0 {
-		return &group, PartialParseError{string(cs)}
+		return group, PartialParseError{string(cs)}
 	}
 
-	return &group, nil
+	return group, nil
 }

@@ -1068,7 +1068,7 @@ func MatchObsGroupList(cs []byte) (*rd.Match, []byte) {
 		rcs        []byte
 	)
 
-	head, cs = rd.MatchMany(rd.TLiteral, cs, 1, func(cs []byte) (*rd.Match, []byte) {
+	head, cs = rd.MatchMany(rd.TNone, cs, 1, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			cfws, c *rd.Match
 			rcs     []byte
@@ -1083,7 +1083,7 @@ func MatchObsGroupList(cs []byte) (*rd.Match, []byte) {
 			return nil, nil
 		}
 
-		return rd.BuildMatch(rd.TLiteral, "", cfws, "", c), cs
+		return rd.BuildMatch(rd.TNone, "", cfws, "", c), cs
 	})
 	if head == nil {
 		return nil, nil
