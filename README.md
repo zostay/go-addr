@@ -1,4 +1,4 @@
-# FFC 5322 Email Address Parser for Go
+# RFC 5322 Email Address Parser for Go
 
 This aims at being a complete and correct RFC 5322 email address parser. It is
 not aimed at being fast. I wish I could say the same for the built in `net/mail`
