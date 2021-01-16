@@ -295,7 +295,7 @@ func MatchDomainLiteralLiteralLiteral(cs []byte) (*rd.Match, []byte) {
 	}
 
 	dtext, cs = MatchDText(cs)
-	if dtext != nil {
+	if dtext == nil {
 		return nil, nil
 	}
 

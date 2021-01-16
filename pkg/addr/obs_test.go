@@ -104,3 +104,18 @@ func TestObsDomain(t *testing.T) {
 		original:  str,
 	}, ml)
 }
+
+func TestObsDText(t *testing.T) {
+	const str = "okay@[\x01\\ \x02\\n\x03\x04]"
+
+	t.Parallel()
+
+	ml, err := ParseEmailAddrSpec(str)
+	assert.NoError(t, err)
+
+	assert.Equal(t, &AddrSpec{
+		localPart: "okay",
+		domain:    "[\x01\\ \x02\\n\x03\x04]",
+		original:  str,
+	}, ml)
+}

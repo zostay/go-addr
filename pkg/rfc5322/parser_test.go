@@ -177,18 +177,44 @@ func TestMatchDomainHappyDotAtom(t *testing.T) {
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
-// func TestMatchDomainLiteralHappy(t *testing.T) {
-// 	t.Parallel()
-//
-// 	mb := "[127.0.0.1]"
-//
-// 	m, cs := MatchDomainLiteral([]byte(mb))
-// 	assert.NotNil(t, m)
-//
-// 	assert.Empty(t, cs)
-// 	assert.Equal(t, rd.TLiteral, m.Tag)
-// 	assert.Equal(t, []byte(mb), m.Content)
-// }
+func TestMatchDomainLiteralHappy(t *testing.T) {
+	t.Parallel()
+
+	mb := "[127.0.0.1]"
+
+	m, cs := MatchDomainLiteral([]byte(mb))
+	assert.NotNil(t, m)
+
+	assert.Empty(t, cs)
+	assert.Equal(t, rd.TLiteral, m.Tag)
+	assert.Equal(t, []byte(mb), m.Content)
+}
+
+func TestMatchDomainLiteralLiteralHappy(t *testing.T) {
+	t.Parallel()
+
+	mb := "127.0.0.1"
+
+	m, cs := MatchDomainLiteralLiteral([]byte(mb))
+	assert.NotNil(t, m)
+
+	assert.Empty(t, cs)
+	assert.Equal(t, rd.TNone, m.Tag)
+	assert.Equal(t, []byte(mb), m.Content)
+}
+
+func TestMatchDomainLiteralLiteralLiteralHappy(t *testing.T) {
+	t.Parallel()
+
+	mb := "1"
+
+	m, cs := MatchDomainLiteralLiteralLiteral([]byte(mb))
+	assert.NotNil(t, m)
+
+	assert.Empty(t, cs)
+	assert.Equal(t, rd.TNone, m.Tag)
+	assert.Equal(t, []byte(mb), m.Content)
+}
 
 func TestMatchDTextHappy(t *testing.T) {
 	t.Parallel()
@@ -442,7 +468,7 @@ func TestMatchObsQTextHappy(t *testing.T) {
 
 	mb := "\x0e"
 
-	m, cs := MatchObsDText([]byte(mb))
+	m, cs := MatchObsQText([]byte(mb))
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
@@ -596,12 +622,41 @@ func TestMatchObsDomainHappy(t *testing.T) {
 func TestMatchObsDTextHappyObsNoWSCtl(t *testing.T) {
 	t.Parallel()
 
-	mb := "\x01"
+	var obsNoWSCtl = []byte{
+		0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8,
+		0xb, 0xc, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13,
+		0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b,
+		0x1c, 0x1d, 0x1e, 0x1f, 0x7f,
+	}
 
-	m, cs := MatchObsDText([]byte(mb))
-	assert.NotNil(t, m)
+	for _, c := range obsNoWSCtl {
+		mb := string(c)
 
-	assert.Empty(t, cs)
-	assert.Equal(t, rd.TLiteral, m.Tag)
-	assert.Equal(t, []byte(mb), m.Content)
+		m, cs := MatchObsDText([]byte(mb))
+		assert.NotNil(t, m)
+
+		assert.Empty(t, cs)
+		assert.Equal(t, rd.TLiteral, m.Tag)
+		assert.Equal(t, []byte(mb), m.Content)
+	}
+}
+
+func TestMatchObsDTextHappyQuotedPair(t *testing.T) {
+	t.Parallel()
+
+	var qp = []string{"\\ ", "\\\t"}
+
+	var b byte
+	for b = 0x21; b <= 0x7e; b++ {
+		qp = append(qp, string([]byte{'\\', b}))
+	}
+
+	for _, mb := range qp {
+		m, cs := MatchObsDText([]byte(mb))
+		assert.NotNil(t, m)
+
+		assert.Empty(t, cs)
+		assert.Equal(t, rd.TLiteral, m.Tag)
+		assert.Equal(t, []byte(mb), m.Content)
+	}
 }
