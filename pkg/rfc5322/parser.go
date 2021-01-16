@@ -13,10 +13,8 @@ const (
 	TDisplayName
 	TAddressList
 	TAddrSpec
-	TDomainLiteral
 	TWords
 	TAtom
-	TDotAtom
 	TCText
 	TCContents
 	TComment
