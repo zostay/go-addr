@@ -167,7 +167,9 @@ func (m *Mailbox) SetAddress(a string) error {
 // associated with the user. The logic works like this:
 //
 // 1. If a display name is present, it will return the display name.
+//
 // 2. If a comment is present, it will return the comment.
+//
 // 3. Fallback to the local part of the email address.
 //
 // Returns the guessed string.
