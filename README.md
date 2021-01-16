@@ -97,7 +97,31 @@ RFC 822.
 
 ## Parsing Functions
 
-These are all part of the `github.com/zostay/go-addr/pkg/addr` package.
+These are all part of the `github.com/zostay/go-addr/pkg/addr` package. All of
+these functions may return an error if there's a problem during the parse or if
+parser can't find an address in the input.
+
+If the input string starts with something that can be parsed as an email
+address, but can't be completely parsed, then the part that can be parsed will
+be returned and a `PartialParseError` will be returned as the error. This has a
+`Remainder` field that can be used to retrieve the unparsed part:
+
+```go
+mb, err := addr.ParseEmailMailbox(
+    "charles.sheffield@example.com and extra text",
+)
+
+var r string
+var ppe addr.PartialParseError
+if errors.As(err, &ppe) {
+    r = ppe.Remainder
+} else if err != nil {
+    panic(err)
+}
+
+fmt.Printf("Parsed: %s\n", mb)
+fmt.Printf("Remainder: %s\n", r)
+```
 
 ### addr.ParseEmailAddress
 
@@ -138,6 +162,20 @@ This will parse a single group address.
 `func ParseEmailAddrSpec(a string) (*addr.AddrSpec, error)`
 
 This will parse a single `addr-spec`.
+
+## net/mail
+
+If you want to convert mailbox email addresses from this library into those of
+the `net/mail` package built-in to Go, you just need to do the following:
+
+```
+addrmb := addr.ParseEmailMailbox("\"David Weber\" <honorh@example.com>")
+mailmb := mail.Address{addrmb.DisplayName(), addrmb.Address()}
+```
+
+That's simple enough and there are enough other useful mail handling libraries
+out there, I didn't bother providing a conversion helper. You can write your own
+in a couple lines of Go.
 
 ## Copyright and License
 
