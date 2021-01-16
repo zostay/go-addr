@@ -1,3 +1,4 @@
+// Package rfc5322 is a parser for RFC 5322 email addresses.
 package rfc5322
 
 import (
@@ -5,6 +6,7 @@ import (
 	"github.com/zostay/go-addr/pkg/rfc5234"
 )
 
+// Tags for RFC 5322 parser matches.
 const (
 	TMailboxList rd.ATag = rd.TLast + iota
 	TNameAddr
@@ -36,8 +38,8 @@ const (
 	TObsDomainOptionalList
 )
 
-// address         =   mailbox / group
-
+// MatchAddress matches a single mailbox or group.
+//  // address         =   mailbox / group
 func MatchAddress(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchMailbox),
@@ -45,8 +47,9 @@ func MatchAddress(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// mailbox         =   name-addr / addr-spec
-
+// MatchMailbox matches a single mailbox email address. This is a complete email
+// address with display name or a bare address.
+//  // mailbox         =   name-addr / addr-spec
 func MatchMailbox(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchNameAddr),
@@ -54,8 +57,9 @@ func MatchMailbox(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// name-addr       =   [display-name] angle-addr
-
+// MatchNameAddr matches a single mailbox address, but only those that have a
+// display name followed by angle address.
+//  // name-addr       =   [display-name] angle-addr
 func MatchNameAddr(cs []byte) (*rd.Match, []byte) {
 	var (
 		dn, aa *rd.Match
@@ -74,17 +78,17 @@ func MatchNameAddr(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TNameAddr, "display-name", dn, "angle-addr", aa), cs
 }
 
-// angle-addr      =   [CFWS] "<" addr-spec ">" [CFWS] /
-//                     obs-angle-addr
-
+// MatchAngleAddr matches a single angle address.
+//  // angle-addr      =   [CFWS] "<" addr-spec ">" [CFWS] /
+//  //                     obs-angle-addr
 func MatchAngleAddr(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		rd.Matcher(MatchCurAngleAddr),
+		rd.Matcher(matchCurAngleAddr),
 		rd.Matcher(MatchObsAngleAddr),
 	)
 }
 
-func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
+func matchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 	var (
 		cfws1, la, as, ra, cfws2 *rd.Match
 		rcs                      []byte
@@ -116,8 +120,9 @@ func MatchCurAngleAddr(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TAngleAddr, "", cfws1, "", la, "addr-spec", as, "", ra, "", cfws2), cs
 }
 
-// group           =   display-name ":" [group-list] ";" [CFWS]
-
+// MatchGroup matches a single group address. A group address is a list of
+// mailbox addresses prefixed with a name and ended with a semi-colon.
+//  // group           =   display-name ":" [group-list] ";" [CFWS]
 func MatchGroup(cs []byte) (*rd.Match, []byte) {
 	var (
 		dn, c, gl, s *rd.Match
@@ -146,8 +151,8 @@ func MatchGroup(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TGroup, "display-name", dn, "", c, "group-list", gl, "", s), cs
 }
 
-// display-name    =   phrase
-
+// MatchDisplayName matches a display name.
+//  // display-name    =   phrase
 func MatchDisplayName(cs []byte) (*rd.Match, []byte) {
 	if p, rcs := MatchPhrase(cs); p != nil {
 		return rd.BuildMatch(TDisplayName, "phrase", p), rcs
@@ -156,40 +161,42 @@ func MatchDisplayName(cs []byte) (*rd.Match, []byte) {
 	return nil, nil
 }
 
-// mailbox-list    =   (mailbox *("," mailbox)) / obs-mbox-list
-
+// MatchMailboxList matches one or more mailboxes (groups are not permitted)
+// separated by commas.
+//  // mailbox-list    =   (mailbox *("," mailbox)) / obs-mbox-list
 func MatchMailboxList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		rd.Matcher(MatchCurMboxList),
+		rd.Matcher(matchCurMboxList),
 		rd.Matcher(MatchObsMboxList),
 	)
 }
 
-func MatchCurMboxList(cs []byte) (*rd.Match, []byte) {
+func matchCurMboxList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchManyWithSep(TMailboxList, cs, 1,
 		MatchMailbox,
 		func(cs []byte) (*rd.Match, []byte) { return rd.MatchOneRune(rd.TNone, cs, ',') },
 	)
 }
 
-// address-list    =   (address *("," address)) / obs-addr-list
-
+// MatchAddressList matches one more more addresses, which includes eiether
+// mailboxes or groups, separated by commas.
+//  // address-list    =   (address *("," address)) / obs-addr-list
 func MatchAddressList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		rd.Matcher(MatchCurAddrList),
+		rd.Matcher(matchCurAddrList),
 		rd.Matcher(MatchObsAddrList),
 	)
 }
 
-func MatchCurAddrList(cs []byte) (*rd.Match, []byte) {
+func matchCurAddrList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchManyWithSep(TAddressList, cs, 1,
 		MatchAddress,
 		func(cs []byte) (*rd.Match, []byte) { return rd.MatchOneRune(rd.TNone, cs, ',') },
 	)
 }
 
-// group-list      =   mailbox-list / CFWS / obs-group-list
-
+// MatchGroupList matches mailboxes that are permitted within an address group.
+//  // group-list      =   mailbox-list / CFWS / obs-group-list
 func MatchGroupList(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchMailboxList),
@@ -198,8 +205,8 @@ func MatchGroupList(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// addr-spec       =   local-part "@" domain
-
+// MatchAddrSpec matches a bare email address.
+//  // addr-spec       =   local-part "@" domain
 func MatchAddrSpec(cs []byte) (*rd.Match, []byte) {
 	var (
 		lp, at, d *rd.Match
@@ -223,8 +230,8 @@ func MatchAddrSpec(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TAddrSpec, "local-part", lp, "", at, "domain", d), cs
 }
 
-// local-part      =   dot-atom / quoted-string / obs-local-part
-
+// MatchLocalPart matches the part of the email address before the at-sign.
+//  // local-part      =   dot-atom / quoted-string / obs-local-part
 func MatchLocalPart(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchDotAtom),
@@ -233,8 +240,8 @@ func MatchLocalPart(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// domain          =   dot-atom / domain-literal / obs-domain
-
+// MatchDomain matches the part of the email after the at-sign.
+//  // domain          =   dot-atom / domain-literal / obs-domain
 func MatchDomain(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchDotAtom),
@@ -243,8 +250,8 @@ func MatchDomain(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// domain-literal  =   [CFWS] "[" *([FWS] dtext) [FWS] "]" [CFWS]
-
+// MatchDomainLiteral domain literals in email addresses.
+//  // domain-literal  =   [CFWS] "[" *([FWS] dtext) [FWS] "]" [CFWS]
 func MatchDomainLiteral(cs []byte) (*rd.Match, []byte) {
 	var (
 		pl, lb, lit, rb *rd.Match
@@ -259,7 +266,7 @@ func MatchDomainLiteral(cs []byte) (*rd.Match, []byte) {
 		return nil, nil
 	}
 
-	lit, cs = MatchDomainLiteralLiteral(cs)
+	lit, cs = matchDomainLiteralLiteral(cs)
 	if lit == nil {
 		return nil, nil
 	}
@@ -278,11 +285,11 @@ func MatchDomainLiteral(cs []byte) (*rd.Match, []byte) {
 	), cs
 }
 
-func MatchDomainLiteralLiteral(cs []byte) (*rd.Match, []byte) {
-	return rd.MatchMany(rd.TNone, cs, 0, MatchDomainLiteralLiteralLiteral)
+func matchDomainLiteralLiteral(cs []byte) (*rd.Match, []byte) {
+	return rd.MatchMany(rd.TNone, cs, 0, matchDomainLiteralLiteralLiteral)
 }
 
-func MatchDomainLiteralLiteralLiteral(cs []byte) (*rd.Match, []byte) {
+func matchDomainLiteralLiteralLiteral(cs []byte) (*rd.Match, []byte) {
 	var (
 		fws, dtext *rd.Match
 		rcs        []byte
@@ -300,10 +307,10 @@ func MatchDomainLiteralLiteralLiteral(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TNone, "", fws, "dtext", dtext), cs
 }
 
-// dtext           =   %d33-90 /          ; Printable US-ASCII
-//                     %d94-126 /         ;  characters not including
-//                     obs-dtext          ;  "[", "]", or "\\"
-
+// MatchDText matches a single character valid for use in a domain literal.
+//  // dtext           =   %d33-90 /          ; Printable US-ASCII
+//  //                     %d94-126 /         ;  characters not including
+//  //                     obs-dtext          ;  "[", "]", or "\\"
 func MatchDText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
@@ -316,8 +323,8 @@ func MatchDText(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// word            =   atom / quoted-string
-
+// MatchWord matches a single word or quoted string.
+//  // word            =   atom / quoted-string
 func MatchWord(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchAtom),
@@ -325,8 +332,8 @@ func MatchWord(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// phrase          =   1*word / obs-phrase
-
+// MatchPhrase matches a list of words.
+//  // phrase          =   1*word / obs-phrase
 func MatchPhrase(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(func(cs []byte) (*rd.Match, []byte) { return rd.MatchMany(TWords, cs, 1, MatchWord) }),
@@ -334,18 +341,18 @@ func MatchPhrase(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// atext           =   ALPHA / DIGIT /    ; Printable US-ASCII
-//                     "!" / "#" /        ;  characters not including
-//                     "\$" / "%" /        ;  specials.  Used for atoms.
-//                     "&" / "'" /
-//                     "*" / "+" /
-//                     "-" / "/" /
-//                     "=" / "?" /
-//                     "^" / "_" /
-//                     "`" / "{" /
-//                     "|" / "}" /
-//                     "~"
-
+// MatchAText matches a single atom character.
+//  // atext           =   ALPHA / DIGIT /    ; Printable US-ASCII
+//  //                     "!" / "#" /        ;  characters not including
+//  //                     "\$" / "%" /        ;  specials.  Used for atoms.
+//  //                     "&" / "'" /
+//  //                     "*" / "+" /
+//  //                     "-" / "/" /
+//  //                     "=" / "?" /
+//  //                     "^" / "_" /
+//  //                     "`" / "{" /
+//  //                     "|" / "}" /
+//  //                     "~"
 func MatchAText(cs []byte) (*rd.Match, []byte) {
 	if m, rcs := rfc5234.MatchAlpha(cs); m != nil {
 		return m, rcs
@@ -367,8 +374,8 @@ func MatchAText(cs []byte) (*rd.Match, []byte) {
 	}
 }
 
-// atom            =   [CFWS] 1*atext [CFWS]
-
+// MatchAtom matches a single atom.
+//  // atom            =   [CFWS] 1*atext [CFWS]
 func MatchAtom(cs []byte) (*rd.Match, []byte) {
 	var (
 		pre, at, post *rd.Match
@@ -391,8 +398,8 @@ func MatchAtom(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TAtom, "pre", pre, "atext", at, "post", post), cs
 }
 
-// dot-atom-text   =   1*atext *("." 1*atext)
-
+// MatchDotAtomText matches a list of atoms connected by periods.
+//  // dot-atom-text   =   1*atext *("." 1*atext)
 func MatchDotAtomText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchManyWithSep(rd.TLiteral, cs, 1,
 		func(cs []byte) (*rd.Match, []byte) { return rd.MatchMany(rd.TNone, cs, 1, MatchAText) },
@@ -400,8 +407,9 @@ func MatchDotAtomText(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// dot-atom        =   [CFWS] dot-atom-text [CFWS]
-
+// MatchDotAtom matches a complete dot atom list bookended by whitespace and
+// comments.
+//  // dot-atom        =   [CFWS] dot-atom-text [CFWS]
 func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 	var (
 		pre, at, post *rd.Match
@@ -424,23 +432,23 @@ func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "pre", pre, "dot-atom-text", at, "post", post), cs
 }
 
-// FWS             =   ([*WSP CRLF] 1*WSP) /  obs-FWS
-//                                        ; Folding white space
-
+// MatchFWS matches folding whitespace.
+//  // FWS             =   ([*WSP CRLF] 1*WSP) /  obs-FWS
+//  //                                        ; Folding white space
 func MatchFWS(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		rd.Matcher(MatchCurFWS),
+		rd.Matcher(matchCurFWS),
 		rd.Matcher(MatchObsFWS),
 	)
 }
 
-func MatchCurFWS(cs []byte) (*rd.Match, []byte) {
+func matchCurFWS(cs []byte) (*rd.Match, []byte) {
 	var (
 		wspcrlf, wsp *rd.Match
 		rcs          []byte
 	)
 
-	if wspcrlf, rcs = MatchCurFWSPre(cs); wspcrlf != nil {
+	if wspcrlf, rcs = matchCurFWSPre(cs); wspcrlf != nil {
 		cs = rcs
 	}
 
@@ -452,7 +460,7 @@ func MatchCurFWS(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "", wspcrlf, "", wsp), cs
 }
 
-func MatchCurFWSPre(cs []byte) (*rd.Match, []byte) {
+func matchCurFWSPre(cs []byte) (*rd.Match, []byte) {
 	var (
 		wsp, crlf *rd.Match
 		rcs       []byte
@@ -470,19 +478,19 @@ func MatchCurFWSPre(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "", wsp, "", crlf), cs
 }
 
-// ctext           =   %d33-39 /          ; Printable US-ASCII
-//                     %d42-91 /          ;  characters not including
-//                     %d93-126 /         ;  "(", ")", or "\"
-//                     obs-ctext
-
+// MatchCText matches a single character permitted in a comment.
+//  // ctext           =   %d33-39 /          ; Printable US-ASCII
+//  //                     %d42-91 /          ;  characters not including
+//  //                     %d93-126 /         ;  "(", ")", or "\"
+//  //                     obs-ctext
 func MatchCText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		rd.Matcher(MatchCurCText),
+		rd.Matcher(matchCurCText),
 		rd.Matcher(MatchObsCText),
 	)
 }
 
-func MatchCurCText(cs []byte) (*rd.Match, []byte) {
+func matchCurCText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(TCText, cs, func(c byte) bool {
 		return (c >= 0x21 && c <= 0x27) ||
 			(c >= 0x2a && c <= 0x5b) ||
@@ -490,8 +498,8 @@ func MatchCurCText(cs []byte) (*rd.Match, []byte) {
 	})
 }
 
-// ccontent        =   ctext / quoted-pair / comment
-
+// MatchCContent matches the content inside of a comment.
+//  // ccontent        =   ctext / quoted-pair / comment
 func MatchCContent(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchCText),
@@ -500,8 +508,8 @@ func MatchCContent(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// comment         =   "(" *([FWS] ccontent) [FWS] ")"
-
+// MatchComment matches a email comment.
+//  // comment         =   "(" *([FWS] ccontent) [FWS] ")"
 func MatchComment(cs []byte) (*rd.Match, []byte) {
 	var (
 		lp, cc, fws, rp *rd.Match
@@ -543,16 +551,16 @@ func MatchComment(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TComment, "", lp, "comment-content", cc, "", rp), cs
 }
 
-// CFWS            =   (1*([FWS] comment) [FWS]) / FWS
-
+// MatchCFWS matches folding whitespace that may contain comments.
+//  // CFWS            =   (1*([FWS] comment) [FWS]) / FWS
 func MatchCFWS(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
-		rd.Matcher(MatchCFWSWithComment),
+		rd.Matcher(matchCFWSWithComment),
 		rd.Matcher(MatchFWS),
 	)
 }
 
-func MatchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
+func matchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
 	var (
 		pres, post *rd.Match
 		rcs        []byte
@@ -586,8 +594,8 @@ func MatchCFWSWithComment(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "pres", pres, "post", post), cs
 }
 
-// obs-FWS         =   1*WSP *(CRLF 1*WSP)
-
+// MatchObsFWS matches parts of folding whitespace taht is no longer permitted.
+//  // obs-FWS         =   1*WSP *(CRLF 1*WSP)
 func MatchObsFWS(cs []byte) (*rd.Match, []byte) {
 	var (
 		wsp, crlfs *rd.Match
@@ -622,11 +630,11 @@ func MatchObsFWS(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "wsp", wsp, "crlfs", crlfs), cs
 }
 
-// qtext           =   %d33 /             ; Printable US-ASCII
-//                     %d35-91 /          ;  characters not including
-//                     %d93-126 /         ;  "\" or the quote character
-//                     obs-qtext
-
+// MatchQText matches characters valid within a quoted string.
+//  // qtext           =   %d33 /             ; Printable US-ASCII
+//  //                     %d35-91 /          ;  characters not including
+//  //                     %d93-126 /         ;  "\" or the quote character
+//  //                     obs-qtext
 func MatchQText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
@@ -640,8 +648,8 @@ func MatchQText(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// qcontent        =   qtext / quoted-pair
-
+// MatchQContent matches the content inside of a quoted string.
+//  // qcontent        =   qtext / quoted-pair
 func MatchQContent(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchQText),
@@ -649,10 +657,10 @@ func MatchQContent(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// quoted-string   =   [CFWS]
-//                     DQUOTE *([FWS] qcontent) [FWS] DQUOTE
-//                     [CFWS]
-
+// MatchQuotedString matches a complete quoted string.
+//  // quoted-string   =   [CFWS]
+//  //                     DQUOTE *([FWS] qcontent) [FWS] DQUOTE
+//  //                     [CFWS]
 func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 	var (
 		cfws1, ldq, qc, fws, rdq, cfws2 *rd.Match
@@ -706,12 +714,12 @@ func MatchQuotedString(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TQuotedString, "", cfws1, "", ldq, "quoted-string", qc, "", fws, "", rdq, "", cfws2), cs
 }
 
-// obs-NO-WS-CTL   =   %d1-8 /            ; US-ASCII control
-//                     %d11 /             ;  characters that do not
-//                     %d12 /             ;  include the carriage
-//                     %d14-31 /          ;  return, line feed, and
-//                     %d127              ;  white space characters
-
+// MatchObsNoWSCtl matches a single character for various obsolete productions.
+//  // obs-NO-WS-CTL   =   %d1-8 /            ; US-ASCII control
+//  //                     %d11 /             ;  characters that do not
+//  //                     %d12 /             ;  include the carriage
+//  //                     %d14-31 /          ;  return, line feed, and
+//  //                     %d127              ;  white space characters
 func MatchObsNoWSCtl(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool {
 		return (c >= 0x1 && c <= 0x8) ||
@@ -722,20 +730,20 @@ func MatchObsNoWSCtl(cs []byte) (*rd.Match, []byte) {
 	})
 }
 
-// obs-ctext       =   obs-NO-WS-CTL
-
+// MatchObsCText matches a single character for a obsolete comment.
+//  // obs-ctext       =   obs-NO-WS-CTL
 func MatchObsCText(cs []byte) (*rd.Match, []byte) {
 	return MatchObsNoWSCtl(cs)
 }
 
-// obs-qtext       =   obs-NO-WS-CTL
-
+// MatchObsQText matches a single character for obsolete quoted string.
+//  // obs-qtext       =   obs-NO-WS-CTL
 func MatchObsQText(cs []byte) (*rd.Match, []byte) {
 	return MatchObsNoWSCtl(cs)
 }
 
-// obs-qp          =   "\\" (%d0 / obs-NO-WS-CTL / LF / CR)
-
+// MatchObsQP matches a quoted pair for obsolete matches.
+//  // obs-qp          =   "\\" (%d0 / obs-NO-WS-CTL / LF / CR)
 func MatchObsQP(cs []byte) (*rd.Match, []byte) {
 	var (
 		bs, ch *rd.Match
@@ -763,8 +771,8 @@ func MatchObsQP(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsQP, "", bs, "", ch), cs
 }
 
-// obs-phrase      =   word *(word / "." / CFWS)
-
+// MatchObsPhrase matches an obsolete phrase.
+//  // obs-phrase      =   word *(word / "." / CFWS)
 func MatchObsPhrase(cs []byte) (*rd.Match, []byte) {
 	var (
 		head, tail *rd.Match
@@ -789,8 +797,8 @@ func MatchObsPhrase(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "head", head, "tail", tail), cs
 }
 
-// quoted-pair     =   ("\\" (VCHAR / WSP)) / obs-qp
-
+// MatchQuotedPair matches a quoted pair for use in email addresses.
+//  // quoted-pair     =   ("\\" (VCHAR / WSP)) / obs-qp
 func MatchQuotedPair(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(func(cs []byte) (*rd.Match, []byte) {
@@ -817,8 +825,8 @@ func MatchQuotedPair(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// obs-angle-addr  =   [CFWS] "<" obs-route addr-spec ">" [CFWS]
-
+// MatchObsAngleAddr matches an obsolete angle address.
+//  // obs-angle-addr  =   [CFWS] "<" obs-route addr-spec ">" [CFWS]
 func MatchObsAngleAddr(cs []byte) (*rd.Match, []byte) {
 	var (
 		cfws1, la, rt, as, ra, cfws2 *rd.Match
@@ -856,8 +864,9 @@ func MatchObsAngleAddr(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsAngleAddr, "", cfws1, "", la, "obs-route", rt, "addr-spec", as, "", ra, "", cfws2), cs
 }
 
-// obs-route       =   obs-domain-list ":"
-
+// MatchObsRoute matches a source route, which is an obsolete email address
+// feature.
+//  // obs-route       =   obs-domain-list ":"
 func MatchObsRoute(cs []byte) (*rd.Match, []byte) {
 	var (
 		dl, c *rd.Match
@@ -876,9 +885,9 @@ func MatchObsRoute(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsRoute, "obs-domain-list", dl, "", c), cs
 }
 
-// obs-domain-list =   *(CFWS / ",") "@" domain
-//                     *("," [CFWS] ["@" domain])
-
+// MatchObsDomainList matches a list of domains for obsolete email addresses.
+//  // obs-domain-list =   *(CFWS / ",") "@" domain
+//  //                     *("," [CFWS] ["@" domain])
 func MatchObsDomainList(cs []byte) (*rd.Match, []byte) {
 	var (
 		bf, at, head, tail *rd.Match
@@ -938,8 +947,8 @@ func MatchObsDomainList(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsDomainList, "", bf, "", at, "head", head, "tail", tail), cs
 }
 
-// obs-mbox-list   =   *([CFWS] ",") mailbox *("," [mailbox / CFWS])
-
+// MatchObsMboxList matches an obsolete list of mailboxes.
+//  // obs-mbox-list   =   *([CFWS] ",") mailbox *("," [mailbox / CFWS])
 func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 	var (
 		bf, head, tail *rd.Match
@@ -999,8 +1008,8 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsMboxList, "", bf, "head", head, "tail", tail), cs
 }
 
-// obs-addr-list   =   *([CFWS] ",") address *("," [address / CFWS])
-
+// MatchObsAddrList matches an obsolete list of addresses.
+//  // obs-addr-list   =   *([CFWS] ",") address *("," [address / CFWS])
 func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 	var (
 		bf, head, tail *rd.Match
@@ -1060,8 +1069,9 @@ func MatchObsAddrList(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsAddrList, "", bf, "head", head, "tail", tail), cs
 }
 
-// obs-group-list  =   1*([CFWS] ",") [CFWS]
-
+// MatchObsGroupList matches obsolete list of mailboxes for use in a group (in
+// this case, allows empty mailboxes lists to match).
+//  // obs-group-list  =   1*([CFWS] ",") [CFWS]
 func MatchObsGroupList(cs []byte) (*rd.Match, []byte) {
 	var (
 		head, tail *rd.Match
@@ -1096,8 +1106,8 @@ func MatchObsGroupList(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsGroupList, "head", head, "tail", tail), cs
 }
 
-// obs-local-part  =   word *("." word)
-
+// MatchObsLocalPart matches an obsolete local part.
+//  // obs-local-part  =   word *("." word)
 func MatchObsLocalPart(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchManyWithSep(TObsLocalPart, cs, 1, MatchWord,
 		func(cs []byte) (*rd.Match, []byte) {
@@ -1106,8 +1116,8 @@ func MatchObsLocalPart(cs []byte) (*rd.Match, []byte) {
 	)
 }
 
-// obs-domain      =   atom *("." atom)
-
+// MatchObsDomain matches an obsolete domain part.
+//  // obs-domain      =   atom *("." atom)
 func MatchObsDomain(cs []byte) (*rd.Match, []byte) {
 	var (
 		head, tail *rd.Match
@@ -1142,8 +1152,8 @@ func MatchObsDomain(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(TObsDomain, "head", head, "tail", tail), cs
 }
 
-// obs-dtext       =   obs-NO-WS-CTL / quoted-pair
-
+// MatchObsDText matches a single obsolete character.
+//  // obs-dtext       =   obs-NO-WS-CTL / quoted-pair
 func MatchObsDText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchObsNoWSCtl),
