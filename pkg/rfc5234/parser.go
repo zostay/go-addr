@@ -1,41 +1,44 @@
+// Package rfc5234 implements an RFC 5234 parser which provides basic
+// productions used by the RFC 5322 parser.
 package rfc5234
 
 import (
 	"github.com/zostay/go-addr/pkg/rd"
 )
 
-// ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
-
+// MatchAlpha matches a single ASCII alphabetical character.
+//  // ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
 func MatchAlpha(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool {
 		return (c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a)
 	})
 }
 
-// DIGIT          =  %x30-39
-//                        ; 0-9
-
+// MatchDigit matches a single ASCII digit.
+//  // DIGIT          =  %x30-39
+//  //                        ; 0-9
 func MatchDigit(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c >= 0x30 && c <= 0x39 })
 }
 
-// CR             =  %x0D
-//                        ; carriage return
-
+// MatchCR matches a single carriage return.
+//  // CR             =  %x0D
+//  //                        ; carriage return
 func MatchCR(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c == 0xd })
 }
 
-// LF             =  %x0A
-//                        ; linefeed
-
+// MatchLF matches a single newline character.
+//  // LF             =  %x0A
+//  //                        ; linefeed
 func MatchLF(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c == 0xa })
 }
 
-// CRLF           =  CR LF
-//                        ; Internet standard newline
-
+// MatchCRLF matches a network new line: a carriage return followed by a line
+// feed.
+//  // CRLF           =  CR LF
+//  //                        ; Internet standard newline
 func MatchCRLF(cs []byte) (*rd.Match, []byte) {
 	var (
 		cr, lf *rd.Match
@@ -54,29 +57,29 @@ func MatchCRLF(cs []byte) (*rd.Match, []byte) {
 	return rd.BuildMatch(rd.TLiteral, "", cr, "", lf), cs
 }
 
-// DQUOTE         =  %x22
-// 					; " (Double Quote)
-
+// MatchDQuote matches a single double quote.
+//  // DQUOTE         =  %x22
+//  // 					; " (Double Quote)
 func MatchDQuote(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c == 0x22 })
 }
 
-// HTAB           =  %x09
-//                   ; horizontal tab
-
+// MatchHTab matches a single tab.
+//  // HTAB           =  %x09
+//  //                   ; horizontal tab
 func MatchHTab(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c == 0x9 })
 }
 
-// SP             =  %x20
-
+// MatchSP matches a single space.
+//  // SP             =  %x20
 func MatchSP(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c == 0x20 })
 }
 
-// WSP            =  SP / HTAB
-//                        ; white space
-
+// MatchWSP matches either a single space or tab.
+//  // WSP            =  SP / HTAB
+//  //                        ; white space
 func MatchWSP(cs []byte) (*rd.Match, []byte) {
 	if m, rcs := MatchSP(cs); m != nil {
 		return m, rcs
@@ -87,9 +90,9 @@ func MatchWSP(cs []byte) (*rd.Match, []byte) {
 	}
 }
 
-// VCHAR          =  %x21-7E
-//                        ; visible (printing) characters
-
+// MatchVChar matches a single visible ASCII character.
+//  // VCHAR          =  %x21-7E
+//  //                        ; visible (printing) characters
 func MatchVChar(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchOne(rd.TLiteral, cs, func(c byte) bool { return c >= 0x21 && c <= 0x7e })
 }
