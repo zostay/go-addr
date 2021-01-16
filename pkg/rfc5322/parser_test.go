@@ -195,7 +195,7 @@ func TestMatchDomainLiteralLiteralHappy(t *testing.T) {
 
 	mb := "127.0.0.1"
 
-	m, cs := MatchDomainLiteralLiteral([]byte(mb))
+	m, cs := matchDomainLiteralLiteral([]byte(mb))
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
@@ -208,7 +208,7 @@ func TestMatchDomainLiteralLiteralLiteralHappy(t *testing.T) {
 
 	mb := "1"
 
-	m, cs := MatchDomainLiteralLiteralLiteral([]byte(mb))
+	m, cs := matchDomainLiteralLiteralLiteral([]byte(mb))
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
