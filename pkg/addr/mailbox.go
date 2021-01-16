@@ -143,8 +143,30 @@ func (m *Mailbox) LocalPart() string { return m.address.LocalPart() }
 //	m.AddrSpec().Domain()
 func (m *Mailbox) Domain() string { return m.address.Domain() }
 
+// SetDisplayName will update the display name for the mailbox. This will also
+// clear an original string if one is set.
+func (m *Mailbox) SetDisplayName(dn string) {
+	m.displayName = dn
+	m.original = ""
+}
+
+// SetComment will update the comment for the mailbox. This will also clear the
+// original string if one is set.
+func (m *Mailbox) SetComment(c string) {
+	m.comment = c
+	m.original = ""
+}
+
+// SetAddrSpec will update the email address for the mailbox. This will also
+// clear the original string if one is set.
+func (m *Mailbox) SetAddrSpec(as *AddrSpec) {
+	m.address = as
+	m.original = ""
+}
+
 // SetAddress will change the email address stored. It parses the string using
-// ParseAddrSpec and updates the object.
+// ParseAddrSpec and updates the object. This will clear the original string if
+// one is set.
 //
 // This will return the error from ParseEmailAddrSpec if the internal call to
 // the parser fails.
@@ -159,6 +181,8 @@ func (m *Mailbox) SetAddress(a string) error {
 	if err != nil {
 		return err
 	}
+
+	m.original = ""
 
 	return nil
 }
