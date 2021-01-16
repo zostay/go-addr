@@ -241,13 +241,6 @@ func applyThisAction(m *rd.Match) (err error) {
 			m.Group["domain"].Made.(string),
 			strings.TrimSpace(string(m.Content)),
 		)
-	case p.TDomainLiteral:
-		var a strings.Builder
-		a.WriteString(m.Group["pre-literal"].Made.(string))
-		a.WriteRune('[')
-		a.Write(unfoldFWS(unquotePairs(m.Group["literal"].Content)))
-		a.WriteRune(']')
-		m.Made = a.String()
 	case p.TObsDomain:
 		var a strings.Builder
 		a.WriteString(strings.TrimSpace(m.Group["head"].Made.(string)))
@@ -264,16 +257,6 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = a.String()
 	case p.TAtom:
 		m.Made = string(m.Group["atext"].Content)
-	case p.TDotAtom:
-		var a strings.Builder
-		if m.Group["pre"] != nil {
-			a.WriteString(m.Group["pre"].Made.(string))
-		}
-		a.WriteString(m.Group["dot-atom-text"].Made.(string))
-		if m.Group["pre"] != nil {
-			a.WriteString(m.Group["post"].Made.(string))
-		}
-		m.Made = a.String()
 	case p.TQuotedString:
 		m.Made = string(unquotePairs([]byte(m.Group["quoted-string"].Made.(string))))
 	case p.TComment:
