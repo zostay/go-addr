@@ -424,18 +424,18 @@ func TestMatchQContentHappyQText(t *testing.T) {
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
-// func TestMatchQuotedStringHappy(t *testing.T) {
-// 	t.Parallel()
-//
-// 	mb := "This ia a quoted string"
-//
-// 	m, cs := MatchQuotedString([]byte(mb))
-// 	assert.NotNil(t, m)
-//
-// 	assert.Empty(t, cs)
-// 	assert.Equal(t, rd.TLiteral, m.Tag)
-// 	assert.Equal(t, []byte(mb), m.Content)
-// }
+func TestMatchQuotedStringHappy(t *testing.T) {
+	t.Parallel()
+
+	mb := "\"This ia a quoted string\""
+
+	m, cs := MatchQuotedString([]byte(mb))
+	assert.NotNil(t, m)
+
+	assert.Empty(t, cs)
+	assert.Equal(t, TQuotedString, m.Tag)
+	assert.Equal(t, []byte(mb), m.Content)
+}
 
 func TestMatchObsNoWSCtlHappy(t *testing.T) {
 	t.Parallel()
