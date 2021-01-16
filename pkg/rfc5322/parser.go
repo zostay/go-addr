@@ -1,7 +1,7 @@
 package rfc5322
 
 import (
-	"github.com/zostay/go-addr/internal/rd"
+	"github.com/zostay/go-addr/pkg/rd"
 	"github.com/zostay/go-addr/pkg/rfc5234"
 )
 

@@ -1,7 +1,7 @@
 package rfc5234
 
 import (
-	"github.com/zostay/go-addr/internal/rd"
+	"github.com/zostay/go-addr/pkg/rd"
 )
 
 // ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z

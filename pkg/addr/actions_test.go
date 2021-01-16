@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/zostay/go-addr/internal/rd"
+	"github.com/zostay/go-addr/pkg/rd"
 	p "github.com/zostay/go-addr/pkg/rfc5322"
 )
 
