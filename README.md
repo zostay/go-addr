@@ -30,8 +30,14 @@ func main() {
 
     for _, a := range as {
         fmt.Println("Name: " + a.DisplayName())
-        fmt.Println("Addr: " + a.AddrSpec().String())
+        fmt.Println("Addr: " + a.Address())
     }
+
+    // Output: 
+    // Name: J.R.R. Tolkein
+    // Addr: j.r.r.tolkein@example.com
+    // Name: C.S. Lewis
+    // Addr: jack@example.com
 }
 ```
 
@@ -107,20 +113,35 @@ be returned and a `PartialParseError` will be returned as the error. This has a
 `Remainder` field that can be used to retrieve the unparsed part:
 
 ```go
-mb, err := addr.ParseEmailMailbox(
-    "charles.sheffield@example.com and extra text",
+package main
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/zostay/go-addr/pkg/addr"
 )
 
-var r string
-var ppe addr.PartialParseError
-if errors.As(err, &ppe) {
-    r = ppe.Remainder
-} else if err != nil {
-    panic(err)
-}
+func main() {
+	mb, err := addr.ParseEmailMailbox(
+		"\"CS\" <charles.sheffield@example.com> and extra text",
+	)
 
-fmt.Printf("Parsed: %s\n", mb)
-fmt.Printf("Remainder: %s\n", r)
+	var r string
+	var ppe addr.PartialParseError
+	if errors.As(err, &ppe) {
+		r = ppe.Remainder
+	} else if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Parsed: %s\n", mb)
+	fmt.Printf("Remainder: %s\n", r)
+    
+    // Output:
+    // Parsed: "CS" <charles.sheffield@example.com>
+    // Remainder: and extra text
+}
 ```
 
 ### addr.ParseEmailAddress
@@ -169,8 +190,21 @@ If you want to convert mailbox email addresses from this library into those of
 the `net/mail` package built-in to Go, you just need to do the following:
 
 ```
-addrmb := addr.ParseEmailMailbox("\"David Weber\" <honorh@example.com>")
-mailmb := mail.Address{addrmb.DisplayName(), addrmb.Address()}
+package main
+
+import (
+    "fmt"
+    "net/mail"
+
+    "github.com/zostay/go-addr/pkg/addr"
+)
+
+func main() {
+    addrmb, _ := addr.ParseEmailMailbox("\"David Weber\" <honorh@example.com>")
+    mailmb := mail.Address{addrmb.DisplayName(), addrmb.Address()}
+    fmt.Println(mailmb)
+    // Output: {David Weber honorh@example.com}
+}
 ```
 
 That's simple enough and there are enough other useful mail handling libraries

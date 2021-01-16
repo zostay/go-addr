@@ -164,17 +164,17 @@ func (m *Mailbox) String() string { return m.OriginalString() }
 func ParseEmailMailbox(a string) (*Mailbox, error) {
 	m, cs := rfc5322.MatchMailbox([]byte(a))
 
-	var mailbox Mailbox
+	var mailbox *Mailbox
 	err := ApplyActions(m, &mailbox)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(cs) > 0 {
-		return &mailbox, PartialParseError{string(cs)}
+		return mailbox, PartialParseError{string(cs)}
 	}
 
-	return &mailbox, nil
+	return mailbox, nil
 }
 
 func ParseEmailMailboxList(a string) (MailboxList, error) {
