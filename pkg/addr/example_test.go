@@ -1,6 +1,7 @@
 package addr_test
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/zostay/go-addr/pkg/addr"
@@ -30,4 +31,26 @@ func Example_mailboxListRoundtripping() {
 	// Output:
 	// "J.R.R. Tolkein" <j.r.r.tolkein@example.com>, "C.S. Lewis" <jack@example.com>
 	// "J.R.R. Tolkein" <j.r.r.tolkein@example.com>, "C.S. Lewis" <jack@example.com>
+}
+
+// This example shows how you can recover from a partial parse, if you want.
+func ExamplePartialParseError() {
+	mb, err := addr.ParseEmailMailbox(
+		"\"CS\" <charles.sheffield@example.com> and extra text",
+	)
+
+	var r string
+	var ppe addr.PartialParseError
+	if errors.As(err, &ppe) {
+		r = ppe.Remainder
+	} else if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Parsed: %s\n", mb)
+	fmt.Printf("Remainder: %s\n", r)
+
+	// Output:
+	// Parsed: CS <charles.sheffield@example.com>
+	// Remainder: and extra text
 }
