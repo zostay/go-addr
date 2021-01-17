@@ -1,3 +1,5 @@
+// Package format provides some tools for formatting and outputting correct RFC
+// 5322 email address strings.
 package format
 
 import (
@@ -6,15 +8,25 @@ import (
 	"github.com/zostay/go-addr/pkg/rfc5322"
 )
 
+// IsAText return true if the given rune matches rfc5322.MatchAText.
 func IsAText(c rune) bool {
 	m, _ := rfc5322.MatchAText([]byte{byte(c)})
 	return m != nil
 }
 
+// CharNeedsEscape if the given rune needs to be escaped when present an emaila
+// ddress part.
 func CharNeedsEscape(c rune) bool {
 	return c == '"' || c == '\\' || c == '\x00' || c == '\t' || c == '\n' || c == '\r'
 }
 
+// MaybeEscape checks to see if the string contains a character that requires
+// escaping. If no such character is detected, the string is returned as is. If
+// a character is detected, the string will be quoted and all the characters
+// within it that require escaping will be escaped.
+//
+// The quoteDot argument is used to turn on quoted for periods as well. This is
+// because some email parts must escape these and others do not.
 func MaybeEscape(s string, quoteDot bool) string {
 	if s == "" {
 		return ""
@@ -54,6 +66,8 @@ func MaybeEscape(s string, quoteDot bool) string {
 	return s[1 : len(s)-1]
 }
 
+// HasMIMEWord detects the presence of a "=?" sequence and returns true if
+// present.
 func HasMIMEWord(s string) bool {
 	return strings.Contains(s, "=?")
 }
