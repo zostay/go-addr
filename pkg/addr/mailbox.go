@@ -31,7 +31,7 @@ func (m *Mailbox) DisplayName() string { return m.displayName }
 
 // Address returns the address part of the email address as a string in angle
 // brackets. This will return the clean address.
-func (m *Mailbox) Address() string { return m.address.CleanString() }
+func (m *Mailbox) Address() string { return m.address.String() }
 
 // AddrSpec returns the AddrSpec used to store the email address in detail.
 func (m *Mailbox) AddrSpec() *AddrSpec { return m.address }

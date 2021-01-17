@@ -17,6 +17,15 @@ type AddrSpec struct {
 	original  string
 }
 
+// DisplayName always returns an empty string.
+func (as *AddrSpec) DisplayName() string { return "" }
+
+// Address is an alias for CleanString.
+func (as *AddrSpec) Address() string { return as.String() }
+
+// Comment always returns an empty string.
+func (as *AddrSpec) Comment() string { return "" }
+
 // LocalPart returns the part of the email address from before the at sign.
 func (as *AddrSpec) LocalPart() string { return as.localPart }
 
