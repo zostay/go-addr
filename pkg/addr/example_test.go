@@ -81,8 +81,8 @@ func ExamplePartialParseError() {
 func ExampleMailbox_convertToMailAddress() {
 	addrmb, _ := addr.ParseEmailMailbox("\"David Weber\" <honorh@example.com>")
 	mailmb := mail.Address{
-		addrmb.DisplayName(),
-		addrmb.Address(),
+		Name:    addrmb.DisplayName(),
+		Address: addrmb.Address(),
 	}
 	fmt.Println(mailmb)
 	// Output: {David Weber honorh@example.com}

@@ -1,7 +1,6 @@
 package addr
 
 import (
-	"bytes"
 	"errors"
 	"strings"
 
@@ -165,7 +164,7 @@ func applySubmatchActions(m *rd.Match) {
 	}
 
 	for i := range m.Submatch {
-		ApplyActions(m.Submatch[i], nil)
+		_ = ApplyActions(m.Submatch[i], nil)
 	}
 }
 
@@ -179,7 +178,7 @@ func applyGroupActions(m *rd.Match) {
 	}
 
 	for k := range m.Group {
-		ApplyActions(m.Group[k], nil)
+		_ = ApplyActions(m.Group[k], nil)
 	}
 }
 
@@ -326,11 +325,13 @@ func applyThisAction(m *rd.Match) (err error) {
 	return nil
 }
 
-func unfoldFWS(x []byte) []byte {
-	bytes.ReplaceAll(x, []byte{'\r', '\n', ' '}, []byte{' '})
-	bytes.ReplaceAll(x, []byte{'\r', '\n', '\t'}, []byte{'\t'})
-	return x
-}
+// Keeping this around even though I am not currently using it. I think I will
+// need it.
+// func unfoldFWS(x []byte) []byte {
+// 	bytes.ReplaceAll(x, []byte{'\r', '\n', ' '}, []byte{' '})
+// 	bytes.ReplaceAll(x, []byte{'\r', '\n', '\t'}, []byte{'\t'})
+// 	return x
+// }
 
 var (
 	quotable = map[byte]struct{}{}
