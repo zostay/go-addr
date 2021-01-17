@@ -955,7 +955,7 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 		bf, head, tail *rd.Match
 	)
 
-	bf, cs = rd.MatchMany(rd.TLiteral, cs, 0, func(cs []byte) (*rd.Match, []byte) {
+	bf, cs = rd.MatchMany(rd.TNone, cs, 0, func(cs []byte) (*rd.Match, []byte) {
 		var (
 			cfws, c *rd.Match
 			rcs     []byte
@@ -965,12 +965,12 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 			cs = rcs
 		}
 
-		c, cs = rd.MatchOneRune(rd.TLiteral, cs, ',')
+		c, cs = rd.MatchOneRune(rd.TNone, cs, ',')
 		if c == nil {
 			return nil, nil
 		}
 
-		return rd.BuildMatch(rd.TLiteral, "", cfws, "", c), cs
+		return rd.BuildMatch(rd.TNone, "", cfws, "", c), cs
 	})
 	if bf == nil {
 		return nil, nil
@@ -987,7 +987,7 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 			rcs   []byte
 		)
 
-		c, cs = rd.MatchOneRune(rd.TLiteral, cs, ',')
+		c, cs = rd.MatchOneRune(rd.TNone, cs, ',')
 		if c == nil {
 			return nil, nil
 		}
@@ -1000,7 +1000,7 @@ func MatchObsMboxList(cs []byte) (*rd.Match, []byte) {
 			cs = rcs
 		}
 
-		return rd.BuildMatch(TObsMboxOptionalList, "", c, "", mb), cs
+		return rd.BuildMatch(TObsMboxOptionalList, "", c, "mb", mb), cs
 	})
 	if tail == nil {
 		return nil, nil

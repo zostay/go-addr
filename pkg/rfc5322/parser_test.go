@@ -109,6 +109,9 @@ func TestMatchMailboxListHappy(t *testing.T) {
 
 	assert.Empty(t, cs)
 	assert.Equal(t, TMailboxList, m.Tag)
+	assert.Equal(t, 2, len(m.Submatch))
+	assert.Equal(t, []byte("\"ABC 123\" <abc213@example.com>"), m.Submatch[0].Content)
+	assert.Equal(t, []byte(" foo <bar@example.com>"), m.Submatch[1].Content)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 

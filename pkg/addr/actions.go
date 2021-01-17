@@ -110,6 +110,10 @@ func applySubmatchActions(m *rd.Match) {
 		return
 	}
 
+	if m.Made != nil {
+		return
+	}
+
 	for i := range m.Submatch {
 		ApplyActions(m.Submatch[i], nil)
 	}
@@ -117,6 +121,10 @@ func applySubmatchActions(m *rd.Match) {
 
 func applyGroupActions(m *rd.Match) {
 	if m.Tag == rd.TNone {
+		return
+	}
+
+	if m.Made != nil {
 		return
 	}
 
@@ -177,7 +185,7 @@ func applyThisAction(m *rd.Match) (err error) {
 	case p.TObsMboxList:
 		gh := m.Group["head"]
 		gt := m.Group["tail"]
-		mailboxes := make(MailboxList, 1+len(gt.Made.(MailboxList)))
+		mailboxes := make(MailboxList, 1, 1+len(gt.Made.(MailboxList)))
 		mailboxes[0] = gh.Made.(*Mailbox)
 		mailboxes = append(mailboxes, gt.Made.(MailboxList)...)
 		m.Made = mailboxes

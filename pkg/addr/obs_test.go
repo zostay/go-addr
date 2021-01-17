@@ -19,21 +19,46 @@ func TestObsAngleAddr(t *testing.T) {
 }
 
 func TestObsMboxList(t *testing.T) {
-	const str = "\"who\" <ok@example.com>, (obsolete comment with no address)"
+	var testStrs = []string{
+		"\"who\" <ok@example.com>, (obsolete comment with no address)",
+		"\"who\" <ok@example.com>, (obsolete comment with no address), <another@example.com>",
+	}
+
+	var testResults = []MailboxList{
+		{
+			&Mailbox{
+				displayName: "who",
+				address:     &AddrSpec{"ok", "example.com", "ok@example.com"},
+				comment:     "",
+				original:    "\"who\" <ok@example.com>",
+			},
+		},
+		{
+			&Mailbox{
+				displayName: "who",
+				address:     &AddrSpec{"ok", "example.com", "ok@example.com"},
+				comment:     "",
+				original:    "\"who\" <ok@example.com>",
+			},
+			&Mailbox{
+				displayName: "",
+				address:     &AddrSpec{"another", "example.com", "another@example.com"},
+				comment:     "",
+				original:    "<another@example.com>",
+			},
+		},
+	}
 
 	t.Parallel()
 
-	ml, err := ParseEmailMailboxList(str)
-	assert.NoError(t, err)
+	for i, str := range testStrs {
+		expect := testResults[i]
 
-	assert.Equal(t, MailboxList{
-		&Mailbox{
-			displayName: "who",
-			address:     &AddrSpec{"ok", "example.com", "ok@example.com"},
-			comment:     "",
-			original:    "\"who\" <ok@example.com>",
-		},
-	}, ml)
+		ml, err := ParseEmailMailboxList(str)
+		assert.NoError(t, err)
+
+		assert.Equal(t, expect, ml)
+	}
 }
 
 func TestObsAddrList(t *testing.T) {
