@@ -9,9 +9,59 @@ import (
 	p "github.com/zostay/go-addr/pkg/rfc5322"
 )
 
+// This is the list of errors that may be returned while parsing and resolving
+// the results of the parse.
+var (
+	// ErrParseConstruction indicates that the parser was able to match the
+	// string, but that object does not produce any output for construction.
+	// This error should never occur unless you make a direct call to
+	// ApplyActions on a rd.Match tag for which ApplyActions does not produce an
+	// object.
+	ErrParseConstruction = errors.New("parse construction error")
+
+	// ErrTypeMismatch indicates that the parser was able to match the string,
+	// but the type of object produced by that match does not match the pointer
+	// provided as the second argument to ApplyActions. The built-in Parse
+	// functions will never do this.
+	ErrTypeMismatch = errors.New("type mismatch")
+
+	// ErrTypeUnknown indicates that the parser was able to match the string,
+	// but then the ApplyActions routine produced an object that it has not been
+	// written to handle. If this error occurs, there is a bug in the package.
+	ErrTypeUnknown = errors.New("unknown applied type")
+
+	// ErrParse indicates that the parser was unable to match the given input.
+	ErrParse = errors.New("email parse failed")
+)
+
+// ApplyActions is a low-level function that can be used to transform an
+// rd.Match object returned by the Parser into a high-level address object. This
+// function is called internally by the Parse functions to produce objects from
+// parsed strings.
+//
+// The second argument must be a pointer to the object that the given rd.Match
+// should produce (or it may be set to nil). This method will then evaluate the
+// Match and all components of the Match to construct an object. If the
+// resulting object is compatible with the pointer, it will be assigned or
+// converted to the correct type and then assigned to it. (For example, if the
+// parse produced an AddrSpec, but the second argument is a pointer to *Mailbox,
+// the AddrSpec will be wrapped in a Mailbox first.)
+//
+// If the second argument is nil, this method will still construct all the
+// objects associated with the match and all components of the match. These can
+// be retrieved by walking the tree and checking the m.Made part of each match.
+//
+// On success, the second argument will be set to the constructed object (unless
+// the second argument was nil) and the error will be returned as nil.
+//
+// On failure, an error is returned and the second argument will not be set. The
+// match tree may be fully or partially modified to set Made.
+//
+// In any case, the tree itself will be unmodified except for assignment to the
+// Made field of the match and other components.
 func ApplyActions(m *rd.Match, mk interface{}) error {
 	if m == nil {
-		return errors.New("email parse failed")
+		return ErrParse
 	}
 
 	applySubmatchActions(m)
@@ -31,7 +81,7 @@ func passThroughMadeObject(m, mk interface{}) error {
 	}
 
 	if m == nil {
-		return errors.New("parse construction error")
+		return ErrParseConstruction
 	}
 
 	switch mv := m.(type) {
@@ -44,7 +94,7 @@ func passThroughMadeObject(m, mk interface{}) error {
 		case **AddrSpec:
 			*mkv = mv.address
 		default:
-			return errors.New("type mismatch")
+			return ErrTypeMismatch
 		}
 	case MailboxList:
 		switch mkv := mk.(type) {
@@ -56,14 +106,14 @@ func passThroughMadeObject(m, mk interface{}) error {
 		case *MailboxList:
 			*mkv = mv
 		default:
-			return errors.New("type mismatch")
+			return ErrTypeMismatch
 		}
 	case AddressList:
 		switch mkv := mk.(type) {
 		case *AddressList:
 			*mkv = mv
 		default:
-			return errors.New("type mismatch")
+			return ErrTypeMismatch
 		}
 	case *Group:
 		switch mkv := mk.(type) {
@@ -72,7 +122,7 @@ func passThroughMadeObject(m, mk interface{}) error {
 		case **Group:
 			*mkv = mv
 		default:
-			return errors.New("type mismatch")
+			return ErrTypeMismatch
 		}
 	case *AddrSpec:
 		switch mkv := mk.(type) {
@@ -89,17 +139,17 @@ func passThroughMadeObject(m, mk interface{}) error {
 		case **AddrSpec:
 			*mkv = mv
 		default:
-			return errors.New("type mismatch")
+			return ErrTypeMismatch
 		}
 	case string:
 		switch mkv := mk.(type) {
 		case *string:
 			*mkv = mv
 		default:
-			return errors.New("type mismatch")
+			return ErrTypeMismatch
 		}
 	default:
-		return errors.New("unknown applied type")
+		return ErrTypeUnknown
 	}
 
 	return nil
