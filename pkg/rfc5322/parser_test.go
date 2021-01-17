@@ -160,7 +160,7 @@ func TestMatchLocalPartHappyDotAtom(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, rd.TLiteral, m.Tag)
+	assert.Equal(t, TDotAtom, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -173,7 +173,7 @@ func TestMatchDomainHappyDotAtom(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, rd.TLiteral, m.Tag)
+	assert.Equal(t, TDotAtom, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -303,7 +303,7 @@ func TestMatchDotAtomHappy(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, rd.TLiteral, m.Tag)
+	assert.Equal(t, TDotAtom, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 
@@ -615,7 +615,7 @@ func TestMatchObsDomainHappy(t *testing.T) {
 	assert.NotNil(t, m)
 
 	assert.Empty(t, cs)
-	assert.Equal(t, rd.TLiteral, m.Tag)
+	assert.Equal(t, TDotAtom, m.Tag)
 	assert.Equal(t, []byte(mb), m.Content)
 }
 

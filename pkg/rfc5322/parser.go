@@ -17,6 +17,7 @@ const (
 	TAddrSpec
 	TWords
 	TAtom
+	TDotAtom
 	TCText
 	TCContents
 	TComment
@@ -429,7 +430,7 @@ func MatchDotAtom(cs []byte) (*rd.Match, []byte) {
 		cs = rcs
 	}
 
-	return rd.BuildMatch(rd.TLiteral, "pre", pre, "dot-atom-text", at, "post", post), cs
+	return rd.BuildMatch(TDotAtom, "pre", pre, "dot-atom-text", at, "post", post), cs
 }
 
 // MatchFWS matches folding whitespace.

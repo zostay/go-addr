@@ -1,4 +1,28 @@
 // Package addr is the primary entry point for working with email addresses.
+//
+// Roundtripping
+//
+// Generally speaking, roundtripping is not desireable when it comes to email
+// addresses. If you are parsing an old email to harvest the email addresses
+// from it, you want to make sure any new email being created to those email
+// addresses use the current format rather than any obsolete format that may
+// have been in use. Use the String() or CleanString() methods to get the
+// canonical string for use with new messages and documents.
+//
+// However, there are caes where being able to understand the details of the
+// address and still be able to output the original is still what is wanted.
+// This library is capable of helping you to a limited extent in preserving the
+// original strings. Use the OriginalString() methods to retrieve the original
+// string for roundtripping.
+//
+// There is a caveat though...
+//
+// The Mailbox, AddrSpec, and Group objects all store the originally parsed text
+// when they are created by the parser. However, the lists of email addresses
+// (either AddressList or MailboxList) are not quite able to totally preserve
+// the original as these are just slices. Any extra comments or whitespace
+// not associated with a mailbox or group email address in the originally parsed
+// text will be lost by those data structures.
 package addr
 
 import (

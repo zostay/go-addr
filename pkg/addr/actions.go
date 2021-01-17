@@ -257,6 +257,8 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made = a.String()
 	case p.TAtom:
 		m.Made = string(m.Group["atext"].Content)
+	case p.TDotAtom:
+		m.Made = m.Group["dot-atom-text"].Made.(string)
 	case p.TQuotedString:
 		m.Made = string(unquotePairs([]byte(m.Group["quoted-string"].Made.(string))))
 	case p.TComment:
