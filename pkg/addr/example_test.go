@@ -3,9 +3,30 @@ package addr_test
 import (
 	"errors"
 	"fmt"
+	"net/mail"
 
 	"github.com/zostay/go-addr/pkg/addr"
 )
+
+// A basic example on how the package works.
+func Example() {
+	addresses := "\"J.R.R. Tolkein\" <j.r.r.tolkein@example.com>, \"C.S. Lewis\" <jack@example.com>"
+	as, err := addr.ParseEmailAddressList(addresses)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, a := range as {
+		fmt.Println("Name: " + a.DisplayName())
+		fmt.Println("Addr: " + a.Address())
+	}
+
+	// Output:
+	// Name: J.R.R. Tolkein
+	// Addr: j.r.r.tolkein@example.com
+	// Name: C.S. Lewis
+	// Addr: jack@example.com
+}
 
 // Here is an example showing the difference between clean strings and original
 // strings for full roundtripping on a Mailbox. ParseEmailAddress,
@@ -53,4 +74,16 @@ func ExamplePartialParseError() {
 	// Output:
 	// Parsed: CS <charles.sheffield@example.com>
 	// Remainder: and extra text
+}
+
+// A quick demo on how to convert these mailboxes into addresses for use with
+// net/mail.
+func ExampleMailbox_convertToMailAddress() {
+	addrmb, _ := addr.ParseEmailMailbox("\"David Weber\" <honorh@example.com>")
+	mailmb := mail.Address{
+		addrmb.DisplayName(),
+		addrmb.Address(),
+	}
+	fmt.Println(mailmb)
+	// Output: {David Weber honorh@example.com}
 }
