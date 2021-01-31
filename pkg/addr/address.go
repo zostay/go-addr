@@ -79,6 +79,11 @@ func (as AddressList) CleanString() string {
 	return a.String()
 }
 
+// String is an alias for CleanString.
+func (as AddressList) String() string {
+	return as.CleanString()
+}
+
 // ParseEmailAddress will parse any single email address. This could actually be
 // multiple mailbox addresses if the email address is a group address. The
 // object returned will either be a *Group or a *Mailbox.
