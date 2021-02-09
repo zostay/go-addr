@@ -248,6 +248,16 @@ func (m *Mailbox) String() string { return m.CleanString() }
 // MailboxList is a slice of mailbox pointers.
 type MailboxList []*Mailbox
 
+// AddressList will transform a MailboxList into an AddressList with the same
+// mailboxes.
+func (ms MailboxList) AddressList() AddressList {
+	as := make(AddressList, len(ms))
+	for i, m := range ms {
+		as[i] = m
+	}
+	return as
+}
+
 // OriginalString returns all the email addresses using their original format
 // for round-tripping.
 //
