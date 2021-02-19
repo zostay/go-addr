@@ -84,6 +84,33 @@ func (as AddressList) String() string {
 	return as.CleanString()
 }
 
+// Flatten returns the AddressList as a MailboxList. This returns a slice of
+// Mailboxes. If the AddressList contains any groups, then the returned
+// MailboxList will contain all the mailboxes within those groups.
+func (as AddressList) Flatten() MailboxList {
+	mbs := make(MailboxList, len(as))
+	for _, a := range as {
+		switch v := a.(type) {
+		case *Mailbox:
+			mbs = append(mbs, v)
+		case *AddrSpec:
+			mb, _ := NewMailbox("", v, "")
+			mbs = append(mbs, mb)
+		case *Group:
+			mbs = append(mbs, v.MailboxList()...)
+		default:
+			mb, _ := NewMailboxStr(
+				a.DisplayName(),
+				a.Address(),
+				a.Comment(),
+			)
+			mbs = append(mbs, mb)
+		}
+	}
+
+	return mbs
+}
+
 // ParseEmailAddress will parse any single email address. This could actually be
 // multiple mailbox addresses if the email address is a group address. The
 // object returned will either be a *Group or a *Mailbox.
