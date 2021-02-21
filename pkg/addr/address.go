@@ -88,7 +88,7 @@ func (as AddressList) String() string {
 // Mailboxes. If the AddressList contains any groups, then the returned
 // MailboxList will contain all the mailboxes within those groups.
 func (as AddressList) Flatten() MailboxList {
-	mbs := make(MailboxList, len(as))
+	mbs := make(MailboxList, 0, len(as))
 	for _, a := range as {
 		switch v := a.(type) {
 		case *Mailbox:
