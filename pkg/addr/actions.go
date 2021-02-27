@@ -30,7 +30,7 @@ var (
 	ErrTypeUnknown = errors.New("unknown applied type")
 
 	// ErrParse indicates that the parser was unable to match the given input.
-	ErrParse = errors.New("email parse failed")
+	ErrParse = errors.New("unable to parse email address")
 )
 
 // ApplyActions is a low-level function that can be used to transform an
