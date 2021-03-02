@@ -2,6 +2,8 @@ package addr
 
 import (
 	"errors"
+	"io"
+	"mime"
 	"strings"
 
 	"github.com/zostay/go-addr/pkg/rd"
@@ -31,6 +33,11 @@ var (
 
 	// ErrParse indicates that the parser was unable to match the given input.
 	ErrParse = errors.New("unable to parse email address")
+)
+
+var (
+	// CharsetReader is used to help perform MIME word decoding.
+	CharsetReader func(charset string, input io.Reader) (io.Reader, error)
 )
 
 // ApplyActions is a low-level function that can be used to transform an
@@ -182,6 +189,19 @@ func applyGroupActions(m *rd.Match) {
 	}
 }
 
+func decodeMIMEWords(in string) string {
+	dec := &mime.WordDecoder{
+		CharsetReader: CharsetReader,
+	}
+
+	out, err := dec.DecodeHeader(in)
+	if err != nil {
+		return in
+	} else {
+		return out
+	}
+}
+
 func applyThisAction(m *rd.Match) (err error) {
 	switch m.Tag {
 	case rd.TLiteral:
@@ -198,7 +218,7 @@ func applyThisAction(m *rd.Match) (err error) {
 		m.Made, err = NewMailboxParsed(
 			dn,
 			m.Group["angle-addr"].Made.(*AddrSpec),
-			c,
+			decodeMIMEWords(c),
 			strings.TrimSpace(string(m.Content)),
 		)
 		if err != nil {
@@ -224,7 +244,7 @@ func applyThisAction(m *rd.Match) (err error) {
 			strings.TrimSpace(string(m.Content)),
 		)
 	case p.TDisplayName:
-		m.Made = strings.TrimSpace(m.Group["phrase"].Made.(string))
+		m.Made = decodeMIMEWords(strings.TrimSpace(m.Group["phrase"].Made.(string)))
 	case p.TMailboxList:
 		mailboxes := make(MailboxList, len(m.Submatch))
 		for i, mb := range m.Submatch {
