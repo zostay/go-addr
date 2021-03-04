@@ -56,3 +56,11 @@ func TestUnicodeEncode(t *testing.T) {
 	assert.Equal(t, "¡Hola, señor!", mb2.Comment())
 	assert.Equal(t, "=?utf-8?q?St=C3=A9rl=C3=AF=C3=B1g?= <sterling@example.com> (=?utf-8?q?=C2=A1Hola,_se=C3=B1or!?=)", mb2.OriginalString())
 }
+
+func TestOddity(t *testing.T) {
+	mb, err := ParseEmailMailbox("\"Customer Support\"\n <support@example.com>")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "Customer Support", mb.DisplayName())
+	assert.Equal(t, "support@example.com", mb.Address())
+}

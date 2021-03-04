@@ -471,7 +471,7 @@ func matchCurFWSPre(cs []byte) (*rd.Match, []byte) {
 		cs = rcs
 	}
 
-	crlf, cs = rfc5234.MatchCRLF(cs)
+	crlf, cs = MatchCRLF(cs)
 	if crlf == nil {
 		return nil, nil
 	}
@@ -612,7 +612,7 @@ func MatchObsFWS(cs []byte) (*rd.Match, []byte) {
 			crlf, wsps *rd.Match
 		)
 
-		crlf, cs = rfc5234.MatchCRLF(cs)
+		crlf, cs = MatchCRLF(cs)
 		if crlf == nil {
 			return nil, nil
 		}
@@ -1159,5 +1159,15 @@ func MatchObsDText(cs []byte) (*rd.Match, []byte) {
 	return rd.MatchLongest(cs,
 		rd.Matcher(MatchObsNoWSCtl),
 		rd.Matcher(MatchQuotedPair),
+	)
+}
+
+// MatchCRLF matches any sensible kind of line ending thing.
+//   // CRLF           = CR LF / CR / LF
+func MatchCRLF(cs []byte) (*rd.Match, []byte) {
+	return rd.MatchLongest(cs,
+		rd.Matcher(rfc5234.MatchCRLF),
+		rd.Matcher(rfc5234.MatchLF),
+		rd.Matcher(rfc5234.MatchCR),
 	)
 }
