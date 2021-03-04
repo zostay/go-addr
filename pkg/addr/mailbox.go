@@ -321,6 +321,7 @@ func (ms MailboxList) String() string { return ms.CleanString() }
 //
 // If the parse fails, the error is returned and mailbox is nil.
 func ParseEmailMailbox(a string) (*Mailbox, error) {
+	a = strings.TrimSpace(a)
 	m, cs := rfc5322.MatchMailbox([]byte(a))
 
 	var mailbox *Mailbox
@@ -350,6 +351,7 @@ func ParseEmailMailbox(a string) (*Mailbox, error) {
 //
 // If the parse fails, teh error is returned and the returned slice will be nil.
 func ParseEmailMailboxList(a string) (MailboxList, error) {
+	a = strings.TrimSpace(a)
 	m, cs := rfc5322.MatchMailboxList([]byte(a))
 
 	var mailboxes MailboxList

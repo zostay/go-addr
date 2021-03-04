@@ -2,6 +2,7 @@ package addr
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/zostay/go-addr/pkg/format"
 	"github.com/zostay/go-addr/pkg/rfc5322"
@@ -93,6 +94,7 @@ func NewAddrSpecParsed(lp, d, o string) *AddrSpec {
 //
 // On failure, the object will be nil and an error will be returned.
 func ParseEmailAddrSpec(a string) (*AddrSpec, error) {
+	a = strings.TrimSpace(a)
 	m, cs := rfc5322.MatchAddrSpec([]byte(a))
 
 	var address *AddrSpec

@@ -119,6 +119,7 @@ func (as AddressList) Flatten() MailboxList {
 // partially successful, the address will be returned and a PartialParseError
 // object will be returned.
 func ParseEmailAddress(a string) (Address, error) {
+	a = strings.TrimSpace(a)
 	m, cs := rfc5322.MatchAddress([]byte(a))
 
 	var address Address
@@ -137,6 +138,7 @@ func ParseEmailAddress(a string) (Address, error) {
 // ParseEmailAddressList will parse any list of addresses. Individual addresses
 // may either be mailboxes or groups.
 func ParseEmailAddressList(a string) (AddressList, error) {
+	a = strings.TrimSpace(a)
 	m, cs := rfc5322.MatchAddressList([]byte(a))
 
 	var addresses AddressList

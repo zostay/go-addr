@@ -94,6 +94,7 @@ func NewGroupParsed(dn string, l MailboxList, o string) *Group {
 // If their is an error parsing the string and no part of a group is found, this
 // will return no group object and an error.
 func ParseEmailGroup(a string) (*Group, error) {
+	a = strings.TrimSpace(a)
 	m, cs := rfc5322.MatchGroup([]byte(a))
 
 	var group *Group
