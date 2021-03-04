@@ -2,6 +2,7 @@ package addr
 
 import (
 	"errors"
+	"mime"
 	"strings"
 
 	"github.com/zostay/go-addr/pkg/format"
@@ -220,11 +221,16 @@ func (m *Mailbox) CleanString() string {
 	// any effort to understand or decode these, we assume we'll just encounter
 	// them as-is but do this one special thing for them
 	if m.displayName != "" {
+		var prepDN string
 		if format.HasMIMEWord(m.displayName) {
-			a.WriteString(m.displayName)
+			prepDN = m.displayName
+		} else if format.NeedsEncoding(m.displayName, false) {
+			// might be nice to make this configgable
+			prepDN = mime.QEncoding.Encode("utf-8", m.displayName)
 		} else {
-			a.WriteString(format.MaybeEscape(m.displayName, false))
+			prepDN = format.MaybeEscape(m.displayName, false)
 		}
+		a.WriteString(prepDN)
 
 		a.WriteString(" <")
 		a.WriteString(m.address.CleanString())
@@ -235,7 +241,13 @@ func (m *Mailbox) CleanString() string {
 
 	if m.comment != "" {
 		a.WriteString(" (")
-		a.WriteString(m.comment)
+		var prepC string
+		if format.NeedsEncoding(m.comment, true) {
+			prepC = mime.QEncoding.Encode("utf-8", m.comment)
+		} else {
+			prepC = m.comment
+		}
+		a.WriteString(prepC)
 		a.WriteString(")")
 	}
 

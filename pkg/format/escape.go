@@ -71,3 +71,25 @@ func MaybeEscape(s string, quoteDot bool) string {
 func HasMIMEWord(s string) bool {
 	return strings.Contains(s, "=?")
 }
+
+// NeedsEncoding detects the presence of characters requiring encoding. If the
+// comment option is set, then it detects if the string contains any non-ctext
+// (i.e., checks to see if the string is not a legal comment).  Otherwise it
+// detects if the string contains any non-atext (i.e., the string is not a legal
+// display name). This check also ignores ASCII horizontal whitespace.
+func NeedsEncoding(s string, comment bool) bool {
+	nonCtext := func(c rune) bool {
+		return (c < 32 && c != '\t') || (c > 39 && c < 42) || c == 92 || c > 126
+	}
+
+	nonAtext := func(c rune) bool {
+		r := !(c == '\t' || (c >= 32 && c <= 126))
+		return r
+	}
+
+	if comment {
+		return strings.IndexFunc(s, nonCtext) > -1
+	} else {
+		return strings.IndexFunc(s, nonAtext) > -1
+	}
+}
