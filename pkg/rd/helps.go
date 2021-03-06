@@ -87,16 +87,22 @@ type Matcher func(cs []byte) (*Match, []byte)
 func MatchOne(t ATag, cs []byte, pred func(c byte) bool) (*Match, []byte) {
 	if len(cs) == 0 {
 		//traceMatch("!MatchOne(%d, %v, %s)", t, string(cs), runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name())
-		traceMatch("TRY MatchOne(%d, empty, %s)", t, runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name())
+		if trace {
+			traceMatch("TRY MatchOne(%d, empty, %s)", t, runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name())
+		}
 		return nil, nil
 	}
 
-	traceMatch("TRY MatchOne(%d, %v, %s)", t, string(cs), runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name())
+	if trace {
+		traceMatch("TRY MatchOne(%d, %v, %s)", t, string(cs), runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name())
+	}
 
 	c := cs[0]
 	if pred(c) {
 		m := Match{Tag: t, Content: cs[0:1]}
-		traceMatch("GOT MatchOne(%d, %v, %s) = %v", t, string(cs), runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name(), m)
+		if trace {
+			traceMatch("GOT MatchOne(%d, %v, %s) = %v", t, string(cs), runtime.FuncForPC(reflect.ValueOf(pred).Pointer()).Name(), m)
+		}
 		return &m, cs[1:]
 	}
 
@@ -106,7 +112,9 @@ func MatchOne(t ATag, cs []byte, pred func(c byte) bool) (*Match, []byte) {
 
 // MatchOneRune matches the next byte if it exactly matches the given rune.
 func MatchOneRune(t ATag, cs []byte, c rune) (*Match, []byte) {
-	traceMatch("TRY MatchOneRune(%d, %v, %c)", t, string(cs), c)
+	if trace {
+		traceMatch("TRY MatchOneRune(%d, %v, %c)", t, string(cs), c)
+	}
 	return MatchOne(t, cs, func(b byte) bool { return b == byte(c) })
 }
 
@@ -138,7 +146,9 @@ func MatchLongest(cs []byte, ms ...Matcher) (*Match, []byte) {
 	}
 
 	if w := selectLongest(msm); w != -1 {
-		traceMatch("GOT MatchLongest(%v) = (%d, %v)", string(cs), w, msm[w])
+		if trace {
+			traceMatch("GOT MatchLongest(%v) = (%d, %v)", string(cs), w, msm[w])
+		}
 		return msm[w], msr[w]
 	}
 
@@ -201,12 +211,14 @@ func MatchManyWithSep(t ATag, cs []byte, min int, mtch Matcher, sep Matcher) (*M
 		Submatch: mbs,
 	}
 
-	traceMatch("GOT MatchManyWithSep(%d, %v, %d, %s, %s) = %v",
-		t, string(cs), min,
-		runtime.FuncForPC(reflect.ValueOf(mtch).Pointer()).Name(),
-		runtime.FuncForPC(reflect.ValueOf(sep).Pointer()).Name(),
-		m,
-	)
+	if trace {
+		traceMatch("GOT MatchManyWithSep(%d, %v, %d, %s, %s) = %v",
+			t, string(cs), min,
+			runtime.FuncForPC(reflect.ValueOf(mtch).Pointer()).Name(),
+			runtime.FuncForPC(reflect.ValueOf(sep).Pointer()).Name(),
+			m,
+		)
+	}
 	return m, cs
 }
 
@@ -241,11 +253,13 @@ func MatchMany(t ATag, cs []byte, min int, mtch Matcher) (*Match, []byte) {
 		Submatch: ms,
 	}
 
-	traceMatch("GOT MatchMany(%d, %v, %d, %s) = %v",
-		t, string(cs), min,
-		runtime.FuncForPC(reflect.ValueOf(mtch).Pointer()).Name(),
-		m,
-	)
+	if trace {
+		traceMatch("GOT MatchMany(%d, %v, %d, %s) = %v",
+			t, string(cs), min,
+			runtime.FuncForPC(reflect.ValueOf(mtch).Pointer()).Name(),
+			m,
+		)
+	}
 
 	return m, cs
 }
