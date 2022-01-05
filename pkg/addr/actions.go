@@ -230,7 +230,11 @@ func applyThisAction(m *rd.Match) (err error) {
 		var mbl MailboxList
 		if ggl := m.Group["group-list"]; ggl != nil {
 			if ggl.Made != nil {
-				mbl = ggl.Made.(MailboxList)
+				var ok bool
+				mbl, ok = ggl.Made.(MailboxList)
+				if !ok {
+					mbl = MailboxList{}
+				}
 			} else {
 				mbl = MailboxList{}
 			}
